@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: marketplace-alert-backend
+    runtime: node
+    plan: starter            # Playwright/Chromium needs real RAM; free tier will OOM.
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "3000"
+      - key: API_KEY
+        sync: false
+      - key: SEARCHES
+        sync: false
+      - key: FCM_SERVICE_ACCOUNT_FILE
+        value: ./secrets/firebase-service-account.json
+      - key: FB_COOKIES_DIR
+        value: ./secrets/fb-cookies
+      - key: FB_PROXY_FILE
+        value: ./secrets/proxies.txt
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

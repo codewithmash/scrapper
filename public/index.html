@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace Alert Backend - Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div id="login-overlay" class="active">
+    <div class="glass-panel login-box">
+      <div class="sparkle"></div>
+      <h1>Admin Dashboard</h1>
+      <p>Enter your API Key to securely configure your monitors.</p>
+      <input type="password" id="api-key" placeholder="x-api-key" />
+      <button id="login-btn">Authenticate</button>
+    </div>
+  </div>
+
+  <div id="dashboard" class="dashboard hidden">
+    <aside class="sidebar glass-panel">
+      <h2>MktAlerts</h2>
+      <nav>
+        <button class="nav-btn" data-tab="tab-listings">Recent Listings</button>
+        <button class="nav-btn active" data-tab="tab-searches">Searches</button>
+        <button class="nav-btn" data-tab="tab-cookies">FB Cookies</button>
+        <button class="nav-btn" data-tab="tab-proxies">Proxies</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logout-btn" class="secondary-btn">Log Out</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- Recent Listings Tab -->
+      <div id="tab-listings" class="tab-pane hidden">
+        <header>
+          <h1>Recent Listings</h1>
+          <button id="refresh-listings-btn" class="secondary-btn">Refresh</button>
+        </header>
+        <div id="listings-grid" class="listings-grid">
+          <!-- JS injected -->
+        </div>
+      </div>
+
+      <div id="tab-searches" class="tab-pane active">
+        <header>
+          <h1>Search Monitors</h1>
+          <button id="add-search-btn" class="primary-btn">+ New Search</button>
+        </header>
+        <div class="glass-panel table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Keyword</th>
+                <th>Location</th>
+                <th>Min $</th>
+                <th>Max $</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="searches-tbody">
+              <!-- JS injected -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-cookies" class="tab-pane hidden">
+        <header>
+          <h1>Facebook Cookies</h1>
+        </header>
+        <div class="glass-panel">
+          <p class="subtitle">Upload JSON cookie files extracted from Playwright to prevent blocks.</p>
+          
+          <div class="upload-area" id="cookie-dropzone">
+            <p>Drag & Drop a cookie .json file here</p>
+            <span class="or">OR</span>
+            <input type="file" id="cookie-file" accept=".json" />
+          </div>
+
+          <h3>Active Cookie Files</h3>
+          <ul id="cookies-list" class="item-list">
+            <!-- JS injected -->
+          </ul>
+        </div>
+      </div>
+
+      <div id="tab-proxies" class="tab-pane hidden">
+        <header>
+          <h1>Proxies</h1>
+          <button id="save-proxies-btn" class="primary-btn">Save Proxies</button>
+        </header>
+        <div class="glass-panel">
+          <p class="subtitle">Enter one proxy per line: <code>host:port:username:password</code></p>
+          <textarea id="proxies-textarea" rows="15" placeholder="127.0.0.1:8080:user:pass"></textarea>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Search Modal -->
+  <div id="modal-add-search" class="modal hidden">
+    <div class="glass-panel modal-content">
+      <h2>Add New Monitor</h2>
+      <div class="form-group">
+        <label>Platform</label>
+        <select id="new-platform">
+          <option value="ebay">eBay</option>
+          <option value="offerup">OfferUp</option>
+          <option value="facebook">Facebook</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Keyword</label>
+        <input type="text" id="new-keyword" placeholder="e.g. iphone 15" />
+      </div>
+      <div class="form-group">
+        <label>Location Slug</label>
+        <input type="text" id="new-location" placeholder="e.g. toronto (Optional)" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Min Price</label>
+          <input type="number" id="new-min" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label>Max Price</label>
+          <input type="number" id="new-max" placeholder="1000" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="cancel-search-btn" class="secondary-btn">Cancel</button>
+        <button id="save-search-btn" class="primary-btn">Add Search</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
