@@ -1,7 +1,10 @@
 import { chromium } from "playwright-extra";
 import stealthPlugin from "puppeteer-extra-plugin-stealth";
 import { FingerprintGenerator } from "fingerprint-generator";
-import { FingerprintInjector } from "fingerprint-injector";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { FingerprintInjector } = require("fingerprint-injector");
 
 // Inject stealth plugin to bypass bot detection (specifically for Facebook)
 chromium.use(stealthPlugin());
