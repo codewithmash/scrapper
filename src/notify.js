@@ -25,29 +25,51 @@ function getMessaging() {
  * @param {string} [topic] override the default topic
  */
 export async function pushNewListings(listings, topic = config.fcm.defaultTopic) {
+  if (listings.length === 0) return;
+
   const m = getMessaging();
-  if (!m || listings.length === 0) return;
+  const { botToken, chatId } = config.telegram;
 
   for (const l of listings) {
-    const message = {
-      topic,
-      notification: {
-        title: `New on ${l.platform}: ${l.title ?? "listing"}`,
-        body: [l.price != null ? `$${l.price}` : null, l.location].filter(Boolean).join(" · "),
-      },
-      // Data payload lets the app deep-link straight to the listing.
-      data: {
-        id: String(l.id ?? ""),
-        url: l.url ?? "",
-        image: l.image ?? "",
-        platform: l.platform ?? "",
-        listed_at: l.listed_at ?? "",
-      },
-    };
-    try {
-      await m.send(message);
-    } catch (err) {
-      console.error(`[notify] FCM send failed for ${l.platform}:${l.id}:`, err.message);
+    // 1. Send FCM Push if configured
+    if (m) {
+      const message = {
+        topic,
+        notification: {
+          title: `New on ${l.platform}: ${l.title ?? "listing"}`,
+          body: [l.price != null ? `$${l.price}` : null, l.location].filter(Boolean).join(" · "),
+        },
+        data: {
+          id: String(l.id ?? ""),
+          url: l.url ?? "",
+          image: l.image ?? "",
+          platform: l.platform ?? "",
+          listed_at: l.listed_at ?? "",
+        },
+      };
+      try {
+        await m.send(message);
+      } catch (err) {
+        console.error(`[notify] FCM send failed for ${l.platform}:${l.id}:`, err.message);
+      }
+    }
+
+    // 2. Send Telegram Message if configured
+    if (botToken && chatId) {
+      const text = `🚨 **New on ${l.platform}**\n\n**${l.title}**\n💰 Price: ${l.price != null ? `$${l.price}` : "N/A"}\n📍 Location: ${l.location || "N/A"}\n\n🔗 [View Listing](${l.url})`;
+      try {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text,
+            parse_mode: "Markdown"
+          }),
+        });
+      } catch (err) {
+        console.error(`[notify] Telegram send failed for ${l.platform}:${l.id}:`, err.message);
+      }
     }
   }
 }

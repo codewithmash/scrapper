@@ -16,7 +16,8 @@ const API = {
   uploadCookie: (filename, content) => API.req("/cookies", { method: "POST", body: JSON.stringify({ filename, content }) }),
   deleteCookie: (filename) => API.req(`/cookies/${filename}`, { method: "DELETE" }),
   getListings: async () => {
-    const res = await fetch("/api/listings/new", { headers: { "x-api-key": apiKey } });
+    // Fetch listings from the last 24 hours (86400 seconds) so they stay visible
+    const res = await fetch("/api/listings/new?sinceSeconds=86400", { headers: { "x-api-key": apiKey } });
     if (res.status === 401) throw new Error("Unauthorized");
     return res.json();
   }

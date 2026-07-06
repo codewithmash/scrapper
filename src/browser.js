@@ -1,5 +1,7 @@
 import { chromium } from "playwright-extra";
 import stealthPlugin from "puppeteer-extra-plugin-stealth";
+import { FingerprintGenerator } from "fingerprint-generator";
+import { FingerprintInjector } from "fingerprint-injector";
 
 // Inject stealth plugin to bypass bot detection (specifically for Facebook)
 chromium.use(stealthPlugin());
@@ -19,13 +21,26 @@ export async function launchBrowser({ proxy } = {}) {
   return browser;
 }
 
-/** Standard, honest desktop context options. */
-export function defaultContextOptions(extra = {}) {
+export function generateFingerprint() {
+  const fingerprintGenerator = new FingerprintGenerator({
+    browsers: [{ name: 'chrome', minVersion: 110 }],
+    devices: ['desktop'],
+    operatingSystems: ['windows', 'macos']
+  });
+  return fingerprintGenerator.getFingerprint();
+}
+
+export const fingerprintInjector = new FingerprintInjector();
+
+export function defaultContextOptions(fingerprintData, extra = {}) {
   return {
-    userAgent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    viewport: { width: 1366, height: 900 },
-    locale: "en-US",
+    userAgent: fingerprintData.fingerprint.navigator.userAgent,
+    viewport: { 
+      width: fingerprintData.fingerprint.screen.width, 
+      height: fingerprintData.fingerprint.screen.height 
+    },
+    locale: fingerprintData.fingerprint.navigator.language || "en-US",
+    ignoreHTTPSErrors: true,
     ...extra,
   };
 }

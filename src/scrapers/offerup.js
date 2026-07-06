@@ -1,4 +1,4 @@
-import { launchBrowser, defaultContextOptions } from "../browser.js";
+import { launchBrowser, defaultContextOptions, generateFingerprint, fingerprintInjector } from "../browser.js";
 import { normalize, withinPrice } from "../normalize.js";
 import { loadProxies } from "../sessions.js";
 
@@ -18,7 +18,9 @@ export async function scrapeOfferUp(search) {
     if (proxy) console.log(`[offerup] trying proxy: ${proxy.server}`);
 
     const browser = await launchBrowser({ proxy });
-    const context = await browser.newContext(defaultContextOptions());
+    const fingerprintData = generateFingerprint();
+    const context = await browser.newContext(defaultContextOptions(fingerprintData));
+    await fingerprintInjector.attachFingerprintToPlaywright(context, fingerprintData);
     const page = await context.newPage();
 
     const params = new URLSearchParams({ q: search.keyword });

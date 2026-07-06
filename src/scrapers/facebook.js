@@ -1,5 +1,6 @@
 // src/scrapers/facebook.js
-import { launchBrowser, defaultContextOptions } from "../browser.js";
+import { launchBrowser, defaultContextOptions, generateFingerprint, fingerprintInjector } from "../browser.js";
+import { createCursor } from "ghost-cursor";
 import { normalize, withinPrice } from "../normalize.js";
 import { makeRotator } from "../sessions.js";
 import fs from "node:fs";
@@ -22,12 +23,14 @@ async function isBlocked(page) {
   return /temporarily blocked|security check|confirm your identity|unusual activity/i.test(text);
 }
 
-async function simulateHumanBehavior(page) {
-  for (let i = 0; i < 5; i++) {
-    const x = 100 + Math.random() * 900;
-    const y = 200 + Math.random() * 700;
-    await page.mouse.move(x, y, { steps: 15 + Math.floor(Math.random() * 20) });
-    await page.waitForTimeout(250 + Math.random() * 650);
+async function simulateHumanBehavior(page, cursor) {
+  if (cursor) {
+    try {
+      await cursor.moveTo({ x: 100 + Math.random() * 800, y: 200 + Math.random() * 600 });
+      await page.waitForTimeout(250 + Math.random() * 500);
+      await cursor.moveTo({ x: 200 + Math.random() * 800, y: 400 + Math.random() * 500 });
+      await page.waitForTimeout(250 + Math.random() * 500);
+    } catch(e) {}
   }
   await page.evaluate(() => window.scrollTo(0, 800));
   await page.waitForTimeout(1000);
@@ -94,22 +97,15 @@ export async function scrapeFacebook(search) {
         console.warn(`[facebook] Failed to read cookie ${cookieFile}:`, err.message);
       }
 
+      const fingerprintData = generateFingerprint();
       const context = await browser.newContext({
-        ...defaultContextOptions({}),
+        ...defaultContextOptions(fingerprintData),
         storageState: cookieObj,
-        viewport: { width: 1366 + Math.floor(Math.random()*350), height: 768 + Math.floor(Math.random()*250) },
-        locale: 'en-US',
-        timezoneId: 'America/New_York',
       });
+      await fingerprintInjector.attachFingerprintToPlaywright(context, fingerprintData);
 
       const page = await context.newPage();
-
-      // Stealth
-      await page.addInitScript(() => {
-        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-        Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
-        Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
-      });
+      const cursor = createCursor(page);
 
       const captured = [];
       page.on("response", async (res) => {
@@ -133,12 +129,17 @@ export async function scrapeFacebook(search) {
         continue;
       }
 
-      await simulateHumanBehavior(page);
-      await browser.close();
-
+      await simulateHumanBehavior(page, cursor);
       const listings = captured.map(n => mapNode(n, search));
       const seen = new Set();
       const unique = listings.filter(l => !seen.has(l.id) && seen.add(l.id));
+
+      if (unique.length === 0) {
+        console.warn(`[facebook] Found 0 listings, taking debug screenshot`);
+        try { await page.screenshot({ path: `public/fb-empty-debug.png` }); } catch(e) {}
+      }
+
+      await browser.close();
 
       return withinPrice(unique, search.minPrice, search.maxPrice);
 

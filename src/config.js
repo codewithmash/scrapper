@@ -38,5 +38,10 @@ export const config = {
     defaultTopic: process.env.FCM_DEFAULT_TOPIC || "new-listings",
   },
 
+  telegram: {
+    botToken: process.env.TELEGRAM_BOT_TOKEN || "",
+    chatId: process.env.TELEGRAM_CHAT_ID || "",
+  },
+
   dbPath: process.env.DB_PATH || "./data/seen.db",
 };
