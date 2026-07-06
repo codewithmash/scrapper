@@ -16,7 +16,7 @@ app.get("/health", (_req, res) => res.json({ ok: true, ts: new Date().toISOStrin
 app.use("/api/listings", listingsRouter);
 app.use("/api/admin", adminRouter);
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`[server] listening on :${config.port}`);
   if (!config.apiKey) {
     console.warn("[server] API_KEY is empty — REST endpoint is UNAUTHENTICATED. Set one before production.");
@@ -32,4 +32,15 @@ app.listen(config.port, () => {
   }
 
   startScheduler();
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`[server] ❌ Error: Port ${config.port} is already in use by another process.`);
+    console.error(`[server] Please stop any other running instances of the scraper or change the PORT in your .env file.`);
+    process.exit(1);
+  } else {
+    console.error("[server] Server startup error:", err.message);
+    process.exit(1);
+  }
 });

@@ -4,7 +4,7 @@ import { createCursor } from "ghost-cursor";
 import { normalize, withinPrice } from "../normalize.js";
 import { loadProxies } from "../sessions.js";
 import { config } from "../config.js";
-import db, { logHealthEvent, recordPollingMetric, markAccountFailed, markAccountSuccess } from "../db.js";
+import db, { logHealthEvent, recordPollingMetric, markAccountFailed, markAccountSuccess, getAccounts, deleteAccount } from "../db.js";
 import { pushAlert } from "../notify.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -76,7 +76,7 @@ export async function scrapeFacebook(search) {
   
   // 1. Get proxies and accounts
   const proxies = loadProxies();
-  const activeAccounts = db.prepare("SELECT * FROM facebook_accounts WHERE status != 'dead'").all();
+  const activeAccounts = getAccounts().filter(a => a.status !== 'dead');
   
   if (activeAccounts.length === 0) {
     console.warn("[facebook] No active Facebook accounts found in database.");
@@ -135,7 +135,7 @@ export async function scrapeFacebook(search) {
     try {
       if (!fs.existsSync(cookieFile)) {
         console.warn(`[facebook] Cookie file not found: ${cookieFile}`);
-        db.prepare("DELETE FROM facebook_accounts WHERE id = ?").run(account.id);
+        deleteAccount(account.id);
         continue;
       }
       
