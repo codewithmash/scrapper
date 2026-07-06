@@ -31,12 +31,16 @@ export function loadProxies() {
     .map((l) => l.trim())
     .filter(Boolean)
     .map((line) => {
-      const [host, port, username, password] = line.split(":");
+      const [proxyPart, label] = line.split("#");
+      const [host, port, username, password] = proxyPart.split(":");
       if (!host || !port) return null;
       return {
+        key: `${host}:${port}`,
+        rawLine: line,
         server: `http://${host}:${port}`,
         ...(username ? { username } : {}),
         ...(password ? { password } : {}),
+        label: label ? label.trim() : "",
       };
     })
     .filter(Boolean);

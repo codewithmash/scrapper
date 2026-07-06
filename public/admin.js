@@ -19,6 +19,7 @@ const API = {
   getAccounts: () => API.req("/accounts"),
   updateAccountStatus: (id, status) => API.req("/accounts/status", { method: "POST", body: JSON.stringify({ id, status }) }),
   assignAccount: (id, searchId) => API.req("/accounts/assign", { method: "POST", body: JSON.stringify({ id, searchId }) }),
+  assignProxy: (id, proxy) => API.req("/accounts/proxy", { method: "POST", body: JSON.stringify({ id, proxy }) }),
   getMetrics: () => API.req("/metrics"),
   
   getListings: async () => {
@@ -267,15 +268,31 @@ function handleCookieFile(file) {
 // --- Accounts & Rotation UI ---
 async function loadAccounts() {
   try {
-    const [searches, accounts] = await Promise.all([
+    const [searches, accounts, proxyData] = await Promise.all([
       API.getSearches(),
-      API.getAccounts()
+      API.getAccounts(),
+      API.getProxies()
     ]);
     
     const fbSearches = searches.filter(s => s.platform === "facebook");
     
+    // Parse proxies to show in dropdown
+    const proxyLines = (proxyData.proxies || "")
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(Boolean);
+    const parsedProxies = proxyLines.map(line => {
+      const [proxyPart, label] = line.split("#");
+      const [host, port] = proxyPart.split(":");
+      return {
+        key: `${host}:${port}`,
+        label: label ? label.trim() : "",
+        displayText: label ? `${host}:${port} (${label.trim()})` : `${host}:${port}`
+      };
+    }).filter(p => p.key);
+    
     if (accounts.length === 0) {
-      el.accountsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 20px;">No accounts synced. Please upload a cookie file in the FB Cookies tab.</td></tr>`;
+      el.accountsTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 20px;">No accounts synced. Please upload a cookie file in the FB Cookies tab.</td></tr>`;
       return;
     }
     
@@ -290,6 +307,15 @@ async function loadAccounts() {
         `)
       ].join("");
       
+      const proxyOptions = [
+        '<option value="">-- Random / Unassigned --</option>',
+        ...parsedProxies.map(p => `
+          <option value="${p.key}" ${a.assigned_proxy === p.key ? 'selected' : ''}>
+            ${p.displayText}
+          </option>
+        `)
+      ].join("");
+      
       const lastUsedText = a.last_used ? new Date(a.last_used).toLocaleString() : 'Never';
       
       // Status color/badges and manually update dropdown
@@ -299,7 +325,7 @@ async function loadAccounts() {
           ${statuses.map(st => `<option value="${st}" ${a.status === st ? 'selected' : ''}>${st.toUpperCase()}</option>`).join("")}
         </select>
       `;
-
+ 
       return `
         <tr>
           <td><code style="color: #60a5fa">${a.id}</code></td>
@@ -307,6 +333,11 @@ async function loadAccounts() {
           <td>
             <select class="assignment-select" onchange="changeAccountAssignment('${a.id}', this.value)">
               ${options}
+            </select>
+          </td>
+          <td>
+            <select class="assignment-select" onchange="changeAccountProxy('${a.id}', this.value)">
+              ${proxyOptions}
             </select>
           </td>
           <td><strong style="color: #4ade80">${a.success_count}</strong></td>
@@ -318,7 +349,7 @@ async function loadAccounts() {
         </tr>
       `;
     }).join("");
-
+ 
   } catch (err) {
     console.error("Failed to load accounts:", err);
   }
@@ -339,6 +370,15 @@ window.changeAccountAssignment = async (id, searchId) => {
     loadAccounts();
   } catch (err) {
     alert("Failed to assign search: " + err.message);
+  }
+};
+
+window.changeAccountProxy = async (id, proxy) => {
+  try {
+    await API.assignProxy(id, proxy || null);
+    loadAccounts();
+  } catch (err) {
+    alert("Failed to assign proxy: " + err.message);
   }
 };
 
@@ -371,8 +411,9 @@ async function loadMetrics() {
         if (payload.listed_at && l.first_seen) {
           const delaySec = (new Date(l.first_seen) - new Date(payload.listed_at)) / 1000;
           if (delaySec >= 0 && delaySec < 86400 * 7) { // filter outliers
-            const key = `${l.platform}::${l.location || 'default'}`;
-            if (!latencyMap[key]) latencyMap[key] = { total: 0, count: 0, platform: l.platform, location: l.location || 'default' };
+            const location = payload.location || 'default';
+            const key = `${l.platform}::${location}`;
+            if (!latencyMap[key]) latencyMap[key] = { total: 0, count: 0, platform: l.platform, location: location };
             latencyMap[key].total += delaySec;
             latencyMap[key].count++;
             

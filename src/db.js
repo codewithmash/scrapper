@@ -60,6 +60,14 @@ db.exec(`
   );
 `);
 
+// Migration: add assigned_proxy column to facebook_accounts if not exists
+try {
+  db.exec("ALTER TABLE facebook_accounts ADD COLUMN assigned_proxy TEXT DEFAULT NULL");
+} catch (err) {
+  // column already exists
+}
+
+
 const getSearchesStmt = db.prepare("SELECT * FROM searches ORDER BY created_at ASC");
 const addSearchStmt = db.prepare(`
   INSERT INTO searches (platform, keyword, location, minPrice, maxPrice)
@@ -95,6 +103,11 @@ const updateAccountStatsFailureStmt = db.prepare(`
 const updateAccountAssignmentStmt = db.prepare(`
   UPDATE facebook_accounts
   SET assigned_search_id = @search_id
+  WHERE id = @id
+`);
+const updateAccountProxyStmt = db.prepare(`
+  UPDATE facebook_accounts
+  SET assigned_proxy = @proxy
   WHERE id = @id
 `);
 const deleteAccountStmt = db.prepare(`
@@ -199,6 +212,10 @@ export function updateAccountAssignment(id, searchId) {
   updateAccountAssignmentStmt.run({ id, search_id });
 }
 
+export function updateAccountProxy(id, proxy) {
+  updateAccountProxyStmt.run({ id, proxy: proxy || null });
+}
+
 export function deleteAccount(id) {
   deleteAccountStmt.run({ id });
 }
@@ -256,7 +273,7 @@ export function getPollingMetrics() {
   
   // 3. Capture Latency from seen_listings
   const listings = db.prepare(`
-    SELECT platform, location, first_seen, payload 
+    SELECT platform, first_seen, payload 
     FROM seen_listings 
     WHERE first_seen >= ?
   `).all(since);

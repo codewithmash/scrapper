@@ -116,8 +116,19 @@ export async function scrapeFacebook(search) {
   for (const account of candidates) {
     const cookieFile = path.join(config.facebook.cookiesDir, account.id);
     let proxy = null;
-    if (proxies.length > 0) {
+    if (account.assigned_proxy) {
+      proxy = proxies.find(p => p.key === account.assigned_proxy);
+      if (proxy) {
+        console.log(`[facebook] Using assigned proxy ${proxy.key} (${proxy.label || 'no label'}) for account ${account.id}`);
+      } else {
+        console.warn(`[facebook] Assigned proxy ${account.assigned_proxy} not found in proxy list. Falling back to random.`);
+      }
+    }
+    if (!proxy && proxies.length > 0) {
       proxy = proxies[Math.floor(Math.random() * proxies.length)];
+      if (proxy) {
+        console.log(`[facebook] Using random proxy ${proxy.key} for account ${account.id}`);
+      }
     }
     
     let browser;

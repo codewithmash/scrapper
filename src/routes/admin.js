@@ -11,7 +11,8 @@ import {
   updateAccountAssignment, 
   deleteAccount, 
   getPollingMetrics, 
-  syncAccountsWithDisk 
+  syncAccountsWithDisk,
+  updateAccountProxy
 } from "../db.js";
 import { loadCookieFiles } from "../sessions.js";
 
@@ -152,6 +153,15 @@ router.post("/accounts/assign", (req, res) => {
     return res.status(400).json({ error: "id required" });
   }
   updateAccountAssignment(id, searchId);
+  res.json({ success: true });
+});
+
+router.post("/accounts/proxy", (req, res) => {
+  const { id, proxy } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "id required" });
+  }
+  updateAccountProxy(id, proxy);
   res.json({ success: true });
 });
 
