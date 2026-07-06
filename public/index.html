@@ -185,11 +185,44 @@
       <div id="tab-proxies" class="tab-pane hidden">
         <header>
           <h1>Proxies</h1>
-          <button id="save-proxies-btn" class="primary-btn">Save Proxies</button>
+          <div style="display: flex; gap: 12px;">
+            <button id="toggle-proxy-view-btn" class="secondary-btn">Switch to Bulk Edit</button>
+            <button id="add-proxy-modal-btn" class="primary-btn">+ New Proxy</button>
+          </div>
         </header>
-        <div class="glass-panel">
-          <p class="subtitle">Enter one proxy per line: <code>host:port:username:password</code></p>
-          <textarea id="proxies-textarea" rows="15" placeholder="127.0.0.1:8080:user:pass"></textarea>
+
+        <!-- Structured Table View -->
+        <div id="proxy-manual-view" class="proxy-view">
+
+
+          <!-- Table -->
+          <div class="glass-panel table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>IP:Port</th>
+                  <th>Username</th>
+                  <th>Password</th>
+                  <th>Country / Label</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="proxies-tbody">
+                <!-- JS injected -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bulk Edit View (Hidden by Default) -->
+        <div id="proxy-bulk-view" class="proxy-view hidden">
+          <div class="glass-panel" style="padding: 20px;">
+            <p class="subtitle" style="margin-top: 0; margin-bottom: 12px;">Enter one proxy per line: <code>host:port:username:password#label</code></p>
+            <textarea id="proxies-textarea" rows="15" placeholder="127.0.0.1:8080:user:pass#US_Chicago" style="width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+            <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+              <button id="save-proxies-btn" class="primary-btn">Save Proxies</button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -228,6 +261,37 @@
       <div class="modal-actions">
         <button id="cancel-search-btn" class="secondary-btn">Cancel</button>
         <button id="save-search-btn" class="primary-btn">Add Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Proxy Modal -->
+  <div id="modal-add-proxy" class="modal hidden">
+    <div class="glass-panel modal-content">
+      <h2>Add New Proxy</h2>
+      <div class="form-group">
+        <label>IP / Host</label>
+        <input type="text" id="proxy-host" placeholder="e.g. 82.21.94.162" />
+      </div>
+      <div class="form-group">
+        <label>Port</label>
+        <input type="text" id="proxy-port" placeholder="e.g. 6428" />
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="proxy-username" placeholder="Optional" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="text" id="proxy-password" placeholder="Optional" />
+      </div>
+      <div class="form-group">
+        <label>Country / Label</label>
+        <input type="text" id="proxy-label" placeholder="e.g. US_Chicago (Optional)" />
+      </div>
+      <div class="modal-actions">
+        <button id="cancel-proxy-btn" class="secondary-btn">Cancel</button>
+        <button id="add-proxy-btn" class="primary-btn">Add Proxy</button>
       </div>
     </div>
   </div>

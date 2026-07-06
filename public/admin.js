@@ -57,6 +57,19 @@ const el = {
   
   proxiesTextarea: document.getElementById("proxies-textarea"),
   saveProxiesBtn: document.getElementById("save-proxies-btn"),
+  toggleProxyViewBtn: document.getElementById("toggle-proxy-view-btn"),
+  addProxyModalBtn: document.getElementById("add-proxy-modal-btn"),
+  modalAddProxy: document.getElementById("modal-add-proxy"),
+  cancelProxyBtn: document.getElementById("cancel-proxy-btn"),
+  proxyManualView: document.getElementById("proxy-manual-view"),
+  proxyBulkView: document.getElementById("proxy-bulk-view"),
+  proxyHost: document.getElementById("proxy-host"),
+  proxyPort: document.getElementById("proxy-port"),
+  proxyUsername: document.getElementById("proxy-username"),
+  proxyPassword: document.getElementById("proxy-password"),
+  proxyLabel: document.getElementById("proxy-label"),
+  addProxyBtn: document.getElementById("add-proxy-btn"),
+  proxiesTbody: document.getElementById("proxies-tbody"),
   
   cookiesList: document.getElementById("cookies-list"),
   cookieFile: document.getElementById("cookie-file"),
@@ -205,15 +218,142 @@ el.refreshListingsBtn.onclick = async () => {
 };
 
 // --- Proxies ---
+let currentProxiesList = []; // stores parsed proxy objects for easy addition/deletion
+
 async function loadProxies() {
   const data = await API.getProxies();
   el.proxiesTextarea.value = data.proxies;
+  
+  // Parse raw proxies to currentProxiesList
+  const proxyLines = (data.proxies || "")
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(Boolean);
+  
+  currentProxiesList = proxyLines.map(line => {
+    const [proxyPart, label] = line.split("#");
+    const parts = proxyPart.split(":");
+    return {
+      host: parts[0] || "",
+      port: parts[1] || "",
+      username: parts[2] || "",
+      password: parts[3] || "",
+      label: label ? label.trim() : "",
+      rawLine: line
+    };
+  }).filter(p => p.host && p.port);
+  
+  renderProxiesTable();
 }
 
+function renderProxiesTable() {
+  if (currentProxiesList.length === 0) {
+    el.proxiesTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 20px;">No proxies configured. Click "+ New Proxy" to add your first proxy!</td></tr>`;
+    return;
+  }
+  
+  el.proxiesTbody.innerHTML = currentProxiesList.map((p, index) => `
+    <tr>
+      <td><strong style="color: #60a5fa">${p.host}:${p.port}</strong></td>
+      <td><code>${p.username || '-'}</code></td>
+      <td><code>${p.password ? '••••••••' : '-'}</code></td>
+      <td><span class="platform-badge platform-ebay" style="background: rgba(96, 165, 250, 0.1); color: #60a5fa;">${p.label || 'Default'}</span></td>
+      <td><button class="danger-btn" onclick="deleteProxyAtIndex(${index})">Delete</button></td>
+    </tr>
+  `).join("");
+}
+
+// Function to save the current currentProxiesList back as raw text
+async function saveProxiesList() {
+  const rawText = currentProxiesList.map(p => {
+    let line = `${p.host}:${p.port}`;
+    if (p.username || p.password) {
+      line += `:${p.username}`;
+    }
+    if (p.password) {
+      line += `:${p.password}`;
+    }
+    if (p.label) {
+      line += `#${p.label}`;
+    }
+    return line;
+  }).join("\n");
+  
+  el.proxiesTextarea.value = rawText;
+  await API.saveProxies(rawText);
+}
+
+// Handler to delete a proxy
+window.deleteProxyAtIndex = async (index) => {
+  if (!confirm("Are you sure you want to delete this proxy?")) return;
+  currentProxiesList.splice(index, 1);
+  await saveProxiesList();
+  renderProxiesTable();
+  // Reload accounts table too since the available proxies list has changed
+  loadAccounts();
+};
+
+// Modal events for Add Proxy
+el.addProxyModalBtn.onclick = () => el.modalAddProxy.classList.remove("hidden");
+el.cancelProxyBtn.onclick = () => el.modalAddProxy.classList.add("hidden");
+
+// Handler to add a new proxy via form
+el.addProxyBtn.onclick = async () => {
+  const host = el.proxyHost.value.trim();
+  const port = el.proxyPort.value.trim();
+  const username = el.proxyUsername.value.trim();
+  const password = el.proxyPassword.value.trim();
+  const label = el.proxyLabel.value.trim();
+  
+  if (!host || !port) {
+    return alert("IP/Host and Port are required!");
+  }
+  
+  const newProxy = { host, port, username, password, label };
+  currentProxiesList.push(newProxy);
+  
+  el.addProxyBtn.textContent = "Adding...";
+  await saveProxiesList();
+  renderProxiesTable();
+  loadAccounts(); // Update assignments dropdown
+  
+  // Clear inputs
+  el.proxyHost.value = "";
+  el.proxyPort.value = "";
+  el.proxyUsername.value = "";
+  el.proxyPassword.value = "";
+  el.proxyLabel.value = "";
+  
+  el.addProxyBtn.textContent = "Add Proxy";
+  el.modalAddProxy.classList.add("hidden");
+};
+
+// Bulk Save Button Click
 el.saveProxiesBtn.onclick = async () => {
   el.saveProxiesBtn.textContent = "Saving...";
   await API.saveProxies(el.proxiesTextarea.value);
+  // Reload model list from textarea
+  await loadProxies();
   setTimeout(() => el.saveProxiesBtn.textContent = "Save Proxies", 1000);
+};
+
+// View Toggler
+let bulkEditMode = false;
+el.toggleProxyViewBtn.onclick = () => {
+  bulkEditMode = !bulkEditMode;
+  if (bulkEditMode) {
+    el.proxyManualView.classList.add("hidden");
+    el.proxyBulkView.classList.remove("hidden");
+    el.toggleProxyViewBtn.textContent = "Switch to Table View";
+    el.addProxyModalBtn.classList.add("hidden");
+  } else {
+    el.proxyManualView.classList.remove("hidden");
+    el.proxyBulkView.classList.add("hidden");
+    el.toggleProxyViewBtn.textContent = "Switch to Bulk Edit";
+    el.addProxyModalBtn.classList.remove("hidden");
+    // Sync textarea changes back to table
+    loadProxies();
+  }
 };
 
 // --- Cookies ---
