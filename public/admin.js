@@ -1111,3 +1111,52 @@ if (menuToggle && sidebar && sidebarOverlay) {
 
 // Boot
 checkAuth();
+
+// --- Auto-Refresh Polling ---
+// Silently refresh data in the background so the dashboard stays live.
+let autoRefreshInterval = null;
+
+function startAutoRefresh() {
+  if (autoRefreshInterval) return; // already running
+  let tick = 0;
+  autoRefreshInterval = setInterval(async () => {
+    // Only poll when dashboard is visible
+    if (el.dashboard.classList.contains("hidden")) return;
+
+    tick++;
+
+    // Every 30s: refresh listings
+    try { await loadListings(); } catch (e) {}
+
+    // Every 60s: also refresh searches + accounts
+    if (tick % 2 === 0) {
+      try { await loadSearches(); } catch (e) {}
+      try { await loadAccounts(); } catch (e) {}
+    }
+
+    // Every 5min: refresh metrics
+    if (tick % 10 === 0) {
+      try { await loadMetrics(); } catch (e) {}
+    }
+  }, 30000); // every 30 seconds
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+  }
+}
+
+// Start auto-refresh once authenticated, stop on logout
+const _origShowDashboard = showDashboard;
+window.showDashboard = function() {
+  _origShowDashboard();
+  startAutoRefresh();
+};
+
+const _origShowLogin = showLogin;
+window.showLogin = function() {
+  _origShowLogin();
+  stopAutoRefresh();
+};

@@ -110,6 +110,11 @@ const updateAccountProxyStmt = db.prepare(`
   SET assigned_proxy = @proxy
   WHERE id = @id
 `);
+const updateAccountStatusWithErrorStmt = db.prepare(`
+  UPDATE facebook_accounts
+  SET error_count = @error_count, status = @status, last_used = @last_used
+  WHERE id = @id
+`);
 const deleteAccountStmt = db.prepare(`
   DELETE FROM facebook_accounts
   WHERE id = @id
@@ -214,6 +219,32 @@ export function updateAccountAssignment(id, searchId) {
 
 export function updateAccountProxy(id, proxy) {
   updateAccountProxyStmt.run({ id, proxy: proxy || null });
+}
+
+/**
+ * Mark a Facebook account as failed. Automatically escalates status:
+ * - 1-2 errors => 'flagged'
+ * - 3+ errors  => 'dead'
+ * Returns the new status string so callers can log/alert.
+ */
+export function markAccountFailed(id, currentErrorCount) {
+  const newErrCount = currentErrorCount + 1;
+  const newStatus = newErrCount >= 3 ? "dead" : "flagged";
+  updateAccountStatusWithErrorStmt.run({
+    id,
+    error_count: newErrCount,
+    status: newStatus,
+    last_used: new Date().toISOString(),
+  });
+  return { newErrCount, newStatus };
+}
+
+/**
+ * Mark a Facebook account as having succeeded. Resets error_count to 0
+ * and sets status back to 'healthy'.
+ */
+export function markAccountSuccess(id) {
+  updateAccountStatsSuccessStmt.run({ id, last_used: new Date().toISOString() });
 }
 
 export function deleteAccount(id) {

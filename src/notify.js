@@ -56,19 +56,41 @@ export async function pushNewListings(listings, topic = config.fcm.defaultTopic)
 
     // 2. Send Telegram Message if configured
     if (botToken && chatId) {
-      const text = `🚨 **New on ${l.platform}**\n\n**${l.title}**\n💰 Price: ${l.price != null ? `$${l.price}` : "N/A"}\n📍 Location: ${l.location || "N/A"}\n\n🔗 [View Listing](${l.url})`;
+      const caption = `🚨 *New on ${l.platform}*\n\n*${l.title}*\n💰 Price: ${l.price != null ? `$${l.price}` : "N/A"}\n📍 Location: ${l.location || "N/A"}\n\n🔗 [View Listing](${l.url})`;
       try {
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text,
-            parse_mode: "Markdown"
-          }),
-        });
-      } catch (err) {
-        console.error(`[notify] Telegram send failed for ${l.platform}:${l.id}:`, err.message);
+        // Try sendPhoto first if image is available
+        if (l.image) {
+          const photoRes = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              photo: l.image,
+              caption,
+              parse_mode: "Markdown"
+            }),
+          });
+          const photoJson = await photoRes.json();
+          // If sendPhoto fails (e.g. bad URL), fall back to text message
+          if (!photoJson.ok) throw new Error(photoJson.description || "sendPhoto failed");
+        } else {
+          throw new Error("no image"); // Skip to sendMessage
+        }
+      } catch (_photoErr) {
+        // Fallback: plain text message
+        try {
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: caption,
+              parse_mode: "Markdown"
+            }),
+          });
+        } catch (err) {
+          console.error(`[notify] Telegram send failed for ${l.platform}:${l.id}:`, err.message);
+        }
       }
     }
   }

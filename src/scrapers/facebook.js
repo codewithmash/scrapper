@@ -4,7 +4,7 @@ import { createCursor } from "ghost-cursor";
 import { normalize, withinPrice } from "../normalize.js";
 import { loadProxies } from "../sessions.js";
 import { config } from "../config.js";
-import db, { logHealthEvent, recordPollingMetric } from "../db.js";
+import db, { logHealthEvent, recordPollingMetric, markAccountFailed, markAccountSuccess } from "../db.js";
 import { pushAlert } from "../notify.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -185,17 +185,11 @@ export async function scrapeFacebook(search) {
       if (await isBlocked(page)) {
         const blockedUrl = page.url();
         console.warn(`[facebook] Session blocked → ${blockedUrl} (cookie: ${account.id})`);
-        try { await page.screenshot({ path: `public/fb-blocked-debug.png` }); } catch(e) {}
+        try { await page.screenshot({ path: `data/fb-blocked-debug.png` }); } catch(e) {}
         await browser.close();
         
-        // Handle account failure
-        const newErrCount = account.error_count + 1;
-        let newStatus = "flagged";
-        if (newErrCount >= 3) {
-          newStatus = "dead";
-        }
-        db.prepare("UPDATE facebook_accounts SET error_count = ?, status = ?, last_used = ? WHERE id = ?")
-          .run(newErrCount, newStatus, new Date().toISOString(), account.id);
+        // Handle account failure using db helper
+        const { newErrCount, newStatus } = markAccountFailed(account.id, account.error_count);
         
         logHealthEvent(account.id, "error", `Session blocked (login/captcha/block). URL: ${blockedUrl}. Consecutive errors: ${newErrCount}. Status updated to: ${newStatus}`);
         
@@ -213,14 +207,13 @@ export async function scrapeFacebook(search) {
 
       if (unique.length === 0) {
         console.warn(`[facebook] Found 0 listings, taking debug screenshot`);
-        try { await page.screenshot({ path: `public/fb-empty-debug.png` }); } catch(e) {}
+        try { await page.screenshot({ path: `data/fb-empty-debug.png` }); } catch(e) {}
       }
 
       await browser.close();
 
       // Successful scraping!
-      db.prepare("UPDATE facebook_accounts SET error_count = 0, success_count = success_count + 1, status = 'healthy', last_used = ? WHERE id = ?")
-        .run(new Date().toISOString(), account.id);
+      markAccountSuccess(account.id);
       
       logHealthEvent(account.id, "success", `Scraped search "${search.keyword}" for ${search.location || "default location"} successfully. Found ${unique.length} items.`);
       
@@ -233,14 +226,8 @@ export async function scrapeFacebook(search) {
       console.error(`[facebook] Attempt with ${account.id} failed:`, err.message);
       if (browser) await browser.close().catch(() => {});
       
-      // Update account stats on exception
-      const newErrCount = account.error_count + 1;
-      let newStatus = "flagged";
-      if (newErrCount >= 3) {
-        newStatus = "dead";
-      }
-      db.prepare("UPDATE facebook_accounts SET error_count = ?, status = ?, last_used = ? WHERE id = ?")
-        .run(newErrCount, newStatus, new Date().toISOString(), account.id);
+      // Update account stats on exception using db helper
+      const { newErrCount, newStatus } = markAccountFailed(account.id, account.error_count);
         
       logHealthEvent(account.id, "error", `Playwright exception: ${err.message}. Consecutive errors: ${newErrCount}. Status updated to: ${newStatus}`);
       

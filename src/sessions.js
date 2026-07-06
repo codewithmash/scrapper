@@ -47,9 +47,9 @@ export function loadProxies() {
 }
 
 /**
- * Round-robin selector shared across poll cycles. Given N cookie files and
- * M proxies, hands out a (cookieFile, proxy) pair each call. This is ordinary
- * failover/round-robin session management, not detection evasion.
+ * Round-robin selector shared across poll cycles.
+ * @deprecated facebook.js manages its own account rotation via the DB.
+ * This function is kept for potential future use by other scrapers.
  */
 export function makeRotator() {
   let cIdx = 0;
