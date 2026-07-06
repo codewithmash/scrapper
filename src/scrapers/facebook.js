@@ -189,7 +189,8 @@ export async function scrapeFacebook(search) {
         }
       });
 
-      await page.goto(buildSearchUrl(search), { waitUntil: "domcontentloaded", timeout: 60000 });
+      await page.goto(buildSearchUrl(search), { waitUntil: "commit", timeout: 30000 });
+      await page.waitForSelector("body", { timeout: 10000 }).catch(() => {});
 
       if (await isBlocked(page)) {
         const blockedUrl = page.url();

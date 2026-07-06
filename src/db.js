@@ -281,6 +281,8 @@ export function syncAccountsWithDisk(diskFiles) {
         deleteAccountStmt.run({ id });
       }
     }
+    // Reset status of all remaining accounts to healthy on startup so we retry them
+    db.prepare("UPDATE facebook_accounts SET status = 'healthy', error_count = 0").run();
   })();
 }
 
