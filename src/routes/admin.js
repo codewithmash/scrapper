@@ -14,6 +14,7 @@ import {
   syncAccountsWithDisk
 } from "../db.js";
 import { loadCookieFiles } from "../sessions.js";
+import { getSystemLogs } from "../logger.js";
 
 const router = express.Router();
 
@@ -164,6 +165,10 @@ router.post("/accounts/assign", (req, res) => {
 // --- Metrics ---
 router.get("/metrics", (req, res) => {
   res.json(getPollingMetrics());
+});
+
+router.get("/logs", (req, res) => {
+  res.json({ logs: getSystemLogs() });
 });
 
 export default router;

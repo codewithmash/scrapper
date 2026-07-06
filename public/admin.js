@@ -21,6 +21,7 @@ const API = {
   assignAccount: (id, searchId) => API.req("/accounts/assign", { method: "POST", body: JSON.stringify({ id, searchId }) }),
   assignProxy: (id, proxy) => API.req("/accounts/proxy", { method: "POST", body: JSON.stringify({ id, proxy }) }),
   getMetrics: () => API.req("/metrics"),
+  getLogs: () => API.req("/logs"),
   
   getListings: async () => {
     // Fetch listings from the last 24 hours (86400 seconds) so they stay visible
@@ -970,12 +971,13 @@ window.deleteCookieAndReload = async (filename) => {
 // --- Metrics & Logs UI ---
 async function loadMetrics() {
   try {
-    const [searches, data] = await Promise.all([
+    const [searches, data, logData] = await Promise.all([
       API.getSearches(),
-      API.getMetrics()
+      API.getMetrics(),
+      API.getLogs()
     ]);
     
-    const { metrics, logs, listings } = data;
+    const { metrics, listings } = data;
     
     // 1. Calculate Latency per Location/Platform
     // Latency = average of (first_seen - listed_at) in seconds
@@ -1061,23 +1063,24 @@ async function loadMetrics() {
       }).join("");
     }
     
-    // 3. Health console logs
-    if (logs.length === 0) {
+    // 3. Real System Console Logs
+    const systemLogs = logData.logs || [];
+    if (systemLogs.length === 0) {
       el.logsContainer.innerHTML = `<p style="color: var(--text-secondary); text-align: center; margin: 0; padding: 20px;">No console logs yet.</p>`;
     } else {
-      el.logsContainer.innerHTML = logs.map(l => {
+      el.logsContainer.innerHTML = systemLogs.map(l => {
         const time = new Date(l.timestamp).toLocaleTimeString();
-        const typeClass = `log-type-${l.type}`;
+        const typeClass = `log-type-${l.type === 'error' ? 'error' : l.type === 'warn' ? 'alert' : 'info'}`;
         return `
-          <div class="log-line ${typeClass}">
-            <span class="log-time">[${time}]</span>
-            <span class="log-account">&lt;${l.account_id || 'system'}&gt;</span>
-            <span class="log-type">[${l.type.toUpperCase()}]</span>
+          <div class="log-line ${typeClass}" style="border-bottom: none; padding: 4px 8px; font-family: monospace; font-size: 0.85rem; line-height: 1.4;">
+            <span class="log-time" style="color: #71717a; margin-right: 6px;">[${time}]</span>
+            <span class="log-type" style="margin-right: 6px;">[${l.type.toUpperCase()}]</span>
             <span class="log-msg">${l.message}</span>
           </div>
         `;
       }).join("");
-      el.logsContainer.scrollTop = 0; // scroll to top
+      // Auto-scroll to bottom like a real terminal
+      el.logsContainer.scrollTop = el.logsContainer.scrollHeight;
     }
 
   } catch (err) {

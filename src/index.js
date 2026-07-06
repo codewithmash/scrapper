@@ -1,3 +1,4 @@
+import "./logger.js";
 import express from "express";
 import { config } from "./config.js";
 import listingsRouter from "./routes/listings.js";

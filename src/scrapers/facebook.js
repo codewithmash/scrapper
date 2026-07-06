@@ -152,7 +152,16 @@ export async function scrapeFacebook(search) {
             if (lower === "lax") sameSite = "Lax";
             else if (lower === "strict") sameSite = "Strict";
           }
-          return { ...c, sameSite };
+          return {
+            name: c.name,
+            value: c.value,
+            domain: c.domain,
+            path: c.path,
+            secure: c.secure,
+            httpOnly: c.httpOnly,
+            sameSite,
+            expires: c.expires ?? c.expirationDate
+          };
         });
       } catch (err) {
         console.warn(`[facebook] Failed to read cookie ${cookieFile}:`, err.message);
