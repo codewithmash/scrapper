@@ -33,11 +33,17 @@ router.get("/searches", (req, res) => {
 });
 
 router.post("/searches", (req, res) => {
-  const { platform, keyword, location, minPrice, maxPrice } = req.body;
+  const { platform, keyword, location, minPrice, maxPrice, fbAccountId } = req.body;
   if (!platform || !keyword) {
     return res.status(400).json({ error: "platform and keyword are required" });
   }
   const id = addSearch({ platform, keyword, location, minPrice, maxPrice });
+
+  // If a specific Facebook account was selected, assign it to this new search
+  if (platform === "facebook" && fbAccountId) {
+    updateAccountAssignment(fbAccountId, id);
+  }
+
   res.json({ success: true, id });
 });
 

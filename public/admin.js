@@ -46,6 +46,9 @@ const el = {
   modalAddSearch: document.getElementById("modal-add-search"),
   saveSearchBtn: document.getElementById("save-search-btn"),
   cancelSearchBtn: document.getElementById("cancel-search-btn"),
+  newPlatform: document.getElementById("new-platform"),
+  fbAccountGroup: document.getElementById("fb-account-group"),
+  newFbAccount: document.getElementById("new-fb-account"),
   
   accountsTbody: document.getElementById("accounts-tbody"),
   
@@ -164,7 +167,33 @@ window.deleteSearch = async (id) => {
   loadSearches();
 };
 
+async function populateFbAccountsDropdown() {
+  try {
+    const accounts = await API.getAccounts();
+    const activeAccounts = accounts.filter(a => a.status !== 'dead');
+    el.newFbAccount.innerHTML = [
+      '<option value="">-- Round-robin / Unassigned --</option>',
+      ...activeAccounts.map(a => `<option value="${a.id}">${a.id} (${a.status.toUpperCase()})</option>`)
+    ].join("");
+  } catch (err) {
+    console.error("Failed to populate FB accounts dropdown:", err);
+  }
+}
+
+el.newPlatform.onchange = () => {
+  if (el.newPlatform.value === "facebook") {
+    el.fbAccountGroup.style.display = "block";
+    populateFbAccountsDropdown();
+  } else {
+    el.fbAccountGroup.style.display = "none";
+  }
+};
+
 el.addSearchBtn.onclick = () => {
+  el.newPlatform.value = "ebay";
+  el.fbAccountGroup.style.display = "none";
+  el.newFbAccount.innerHTML = '<option value="">-- Round-robin / Unassigned --</option>';
+  
   document.getElementById("new-keyword").value = "";
   document.getElementById("new-location").value = "";
   document.getElementById("new-min").value = "";
@@ -179,13 +208,17 @@ el.cancelSearchBtn.onclick = () => el.modalAddSearch.classList.add("hidden");
 
 el.saveSearchBtn.onclick = async () => {
   const data = {
-    platform: document.getElementById("new-platform").value,
+    platform: el.newPlatform.value,
     keyword: document.getElementById("new-keyword").value.trim(),
     location: document.getElementById("new-location").value.trim() || null,
     minPrice: parseFloat(document.getElementById("new-min").value) || null,
     maxPrice: parseFloat(document.getElementById("new-max").value) || null,
   };
   if (!data.keyword) return alert("Keyword is required!");
+  
+  if (data.platform === "facebook") {
+    data.fbAccountId = el.newFbAccount.value || null;
+  }
   
   el.saveSearchBtn.textContent = "Saving...";
   await API.addSearch(data);
@@ -851,7 +884,7 @@ async function loadAccounts() {
     }).filter(p => p.key);
     
     if (accounts.length === 0) {
-      el.accountsTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 20px;">No accounts synced. Please upload a cookie file in the FB Cookies tab.</td></tr>`;
+      el.accountsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 20px;">No accounts synced. Please upload a cookie file in the FB Cookies tab.</td></tr>`;
       return;
     }
     
@@ -862,15 +895,6 @@ async function loadAccounts() {
         ...fbSearches.map(s => `
           <option value="${s.id}" ${a.assigned_search_id === s.id ? 'selected' : ''}>
             ${s.keyword} (${s.location || 'default'})
-          </option>
-        `)
-      ].join("");
-      
-      const proxyOptions = [
-        '<option value="">-- Random / Unassigned --</option>',
-        ...parsedProxies.map(p => `
-          <option value="${p.key}" ${a.assigned_proxy === p.key ? 'selected' : ''}>
-            ${p.displayText}
           </option>
         `)
       ].join("");
@@ -892,11 +916,6 @@ async function loadAccounts() {
           <td>
             <select class="assignment-select" onchange="changeAccountAssignment('${a.id}', this.value)">
               ${options}
-            </select>
-          </td>
-          <td>
-            <select class="assignment-select" onchange="changeAccountProxy('${a.id}', this.value)">
-              ${proxyOptions}
             </select>
           </td>
           <td><strong style="color: #4ade80">${a.success_count}</strong></td>
