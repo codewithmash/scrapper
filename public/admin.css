@@ -518,3 +518,145 @@ textarea:focus, input:focus, select:focus {
     max-width: 100%;
   }
 }
+
+/* Custom Select Dropdown with Flags Support */
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+.custom-select-trigger {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--panel-border);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.custom-select-trigger:focus-within, .custom-select-trigger:active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.custom-select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(13, 19, 33, 0.98);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+  margin-top: 4px;
+}
+.custom-select-options.hidden {
+  display: none;
+}
+.custom-option {
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+.custom-option:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: #818cf8;
+}
+.custom-option .fi {
+  flex-shrink: 0;
+}
+
+/* Custom Scrollbar for Options Panels */
+.custom-select-options::-webkit-scrollbar,
+.row-select-options::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-select-options::-webkit-scrollbar-track,
+.row-select-options::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+.custom-select-options::-webkit-scrollbar-thumb,
+.row-select-options::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+.custom-select-options::-webkit-scrollbar-thumb:hover,
+.row-select-options::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Custom dropdown inside table rows (supporting flags on Windows) */
+.row-select {
+  position: relative;
+  display: inline-block;
+  width: 170px;
+}
+.row-select-trigger {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+.row-select-trigger:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(255, 255, 255, 0.03);
+}
+.row-select-trigger span:first-of-type {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.row-select-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(13, 19, 33, 0.98);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 999;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+  margin-top: 4px;
+}
+.row-select-options.hidden {
+  display: none;
+}
+.row-option {
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  color: white;
+}
+.row-option:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: #818cf8;
+}
+.row-option .fi {
+  flex-shrink: 0;
+}

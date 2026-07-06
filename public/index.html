@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://flagcdn.io/css/flag-icons.min.css" />
 </head>
 <body>
   <div id="login-overlay" class="active">
@@ -185,8 +186,20 @@
       <div id="tab-proxies" class="tab-pane hidden">
         <header>
           <h1>Proxies</h1>
-          <div style="display: flex; gap: 12px;">
-            <button id="toggle-proxy-view-btn" class="secondary-btn">Switch to Bulk Edit</button>
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap;">Filter:</span>
+              <div class="custom-select" id="filter-proxy-country-select" style="width: 170px;">
+                <div class="custom-select-trigger" id="filter-proxy-country-trigger" style="padding: 6px 10px; border-radius: 6px; font-size: 0.85rem;">
+                  <span>-- All Countries --</span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">▼</span>
+                </div>
+                <div class="custom-select-options hidden" id="filter-proxy-country-options" style="max-height: 180px;">
+                  <!-- JS populated -->
+                </div>
+              </div>
+              <input type="hidden" id="filter-proxy-country" value="" />
+            </div>
             <button id="add-proxy-modal-btn" class="primary-btn">+ New Proxy</button>
           </div>
         </header>
@@ -211,17 +224,6 @@
                 <!-- JS injected -->
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- Bulk Edit View (Hidden by Default) -->
-        <div id="proxy-bulk-view" class="proxy-view hidden">
-          <div class="glass-panel" style="padding: 20px;">
-            <p class="subtitle" style="margin-top: 0; margin-bottom: 12px;">Enter one proxy per line: <code>host:port:username:password#label</code></p>
-            <textarea id="proxies-textarea" rows="15" placeholder="127.0.0.1:8080:user:pass#US_Chicago" style="width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
-            <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
-              <button id="save-proxies-btn" class="primary-btn">Save Proxies</button>
-            </div>
           </div>
         </div>
       </div>
@@ -270,24 +272,23 @@
     <div class="glass-panel modal-content">
       <h2>Add New Proxy</h2>
       <div class="form-group">
-        <label>IP / Host</label>
-        <input type="text" id="proxy-host" placeholder="e.g. 82.21.94.162" />
+        <label>Country (Optional override for all pasted proxies)</label>
+        <div class="custom-select" id="proxy-country-select">
+          <div class="custom-select-trigger" id="proxy-country-trigger">
+            <span>-- Select Country (Optional) --</span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">▼</span>
+          </div>
+          <div class="custom-select-options hidden" id="proxy-country-options">
+            <!-- JS populated -->
+          </div>
+        </div>
+        <input type="hidden" id="proxy-country" value="" />
       </div>
-      <div class="form-group">
-        <label>Port</label>
-        <input type="text" id="proxy-port" placeholder="e.g. 6428" />
-      </div>
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="proxy-username" placeholder="Optional" />
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="text" id="proxy-password" placeholder="Optional" />
-      </div>
-      <div class="form-group">
-        <label>Country / Label</label>
-        <input type="text" id="proxy-label" placeholder="e.g. US_Chicago (Optional)" />
+      <div class="form-group" style="margin-top: 20px;">
+        <label>Paste Proxies (One per line: <code>host:port:username:password#label</code>)</label>
+        <textarea id="proxy-bulk-input" rows="8"
+          placeholder="72.1.178.85:6979:cgmpmhue:kq6i8sxb2bju&#10;103.243.146.208:5905:cgmpmhue:kq6i8sxb2bju#US_Chicago"
+          style="width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
       </div>
       <div class="modal-actions">
         <button id="cancel-proxy-btn" class="secondary-btn">Cancel</button>

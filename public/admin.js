@@ -55,19 +55,12 @@ const el = {
   avgLatency: document.getElementById("avg-latency"),
   globalSuccessRate: document.getElementById("global-success-rate"),
   
-  proxiesTextarea: document.getElementById("proxies-textarea"),
-  saveProxiesBtn: document.getElementById("save-proxies-btn"),
-  toggleProxyViewBtn: document.getElementById("toggle-proxy-view-btn"),
   addProxyModalBtn: document.getElementById("add-proxy-modal-btn"),
   modalAddProxy: document.getElementById("modal-add-proxy"),
   cancelProxyBtn: document.getElementById("cancel-proxy-btn"),
   proxyManualView: document.getElementById("proxy-manual-view"),
-  proxyBulkView: document.getElementById("proxy-bulk-view"),
-  proxyHost: document.getElementById("proxy-host"),
-  proxyPort: document.getElementById("proxy-port"),
-  proxyUsername: document.getElementById("proxy-username"),
-  proxyPassword: document.getElementById("proxy-password"),
-  proxyLabel: document.getElementById("proxy-label"),
+  proxyBulkInput: document.getElementById("proxy-bulk-input"),
+  proxyCountry: document.getElementById("proxy-country"),
   addProxyBtn: document.getElementById("add-proxy-btn"),
   proxiesTbody: document.getElementById("proxies-tbody"),
   
@@ -85,6 +78,7 @@ async function checkAuth() {
   try {
     await loadSearches();
     showDashboard();
+    await loadCountriesDropdown();
     loadProxies();
     loadCookies();
     loadListings();
@@ -217,12 +211,251 @@ el.refreshListingsBtn.onclick = async () => {
   setTimeout(() => el.refreshListingsBtn.textContent = "Refresh", 500);
 };
 
+// --- Helper to get country flag emoji/image from label ---
+let countryFlagsData = {};
+const ipCountryCache = JSON.parse(localStorage.getItem("mkt-ip-country-cache") || "{}");
+const pendingLookups = new Set();
+
+function triggerIpLookup(ip) {
+  if (!ip || ip.includes("127.0.0.1") || ip.includes("localhost") || pendingLookups.has(ip)) {
+    return;
+  }
+  pendingLookups.add(ip);
+  
+  fetch(`https://freeipapi.com/api/json/${ip}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.countryCode) {
+        ipCountryCache[ip] = data.countryCode;
+        localStorage.setItem("mkt-ip-country-cache", JSON.stringify(ipCountryCache));
+        // Re-render proxy components to show the newly resolved flag
+        if (typeof renderProxiesTable === "function") renderProxiesTable();
+        if (typeof loadAccounts === "function") loadAccounts();
+      }
+    })
+    .catch(e => console.error("GeoIP error:", e))
+    .finally(() => {
+      pendingLookups.delete(ip);
+    });
+}
+
+function getFlagImgHtml(label, host) {
+  let countryCode = "";
+  
+  // 1. Try resolving from label
+  if (label) {
+    const cleaned = label.trim();
+    const match = cleaned.match(/^([a-zA-Z]{2})(?:[_-\s]|$)/);
+    if (match) {
+      countryCode = match[1].toLowerCase();
+    } else {
+      const lower = cleaned.toLowerCase();
+      if (countryFlagsData) {
+        for (const [code, data] of Object.entries(countryFlagsData)) {
+          if (lower === data.name.toLowerCase() || lower.includes(data.name.toLowerCase())) {
+            countryCode = code.toLowerCase();
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  // 2. If no label country resolved, use host IP lookup
+  if (!countryCode && host) {
+    const ip = host.split(":")[0];
+    if (ipCountryCache[ip]) {
+      countryCode = ipCountryCache[ip].toLowerCase();
+    } else {
+      triggerIpLookup(ip);
+    }
+  }
+  
+  if (countryCode && /^[a-z]{2}$/.test(countryCode)) {
+    return `<span class="fi fi-${countryCode}" style="border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); width: 20px; height: 15px; display: inline-block; vertical-align: middle;"></span>`;
+  }
+  
+  return "";
+}
+
+async function loadCountriesDropdown() {
+  try {
+    const res = await fetch("https://cdn.jsdelivr.net/npm/country-flag-emoji-json@2.0.0/dist/by-code.json");
+    countryFlagsData = await res.json();
+    
+    // 1. Populate the table list dropdowns
+    renderProxiesTable();
+    
+    // 2. Populate the modal country select dropdown
+    const optionsContainer = document.getElementById("proxy-country-options");
+    const selectTrigger = document.getElementById("proxy-country-trigger");
+    const hiddenInput = el.proxyCountry;
+    
+    if (optionsContainer && selectTrigger && hiddenInput) {
+      optionsContainer.innerHTML = `
+        <div class="custom-option" data-value="" data-text="-- Select Country (Optional) --">
+          -- Select Country (Optional) --
+        </div>
+        ${Object.entries(countryFlagsData).map(([code, data]) => `
+          <div class="custom-option" data-value="${code}" data-text="${data.name}">
+            <span class="fi fi-${code.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block;"></span>
+            <span>${data.name}</span>
+          </div>
+        `).join("")}
+      `;
+      
+      // Trigger toggle
+      selectTrigger.onclick = (e) => {
+        e.stopPropagation();
+        optionsContainer.classList.toggle("hidden");
+      };
+      
+      // Option select
+      optionsContainer.querySelectorAll(".custom-option").forEach(opt => {
+        opt.onclick = (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute("data-value");
+          const name = opt.getAttribute("data-text");
+          hiddenInput.value = val;
+          
+          if (val) {
+            selectTrigger.querySelector("span").innerHTML = `
+              <span class="fi fi-${val.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block; vertical-align: middle; margin-right: 8px;"></span>
+              <span style="vertical-align: middle;">${name}</span>
+            `;
+          } else {
+            selectTrigger.querySelector("span").innerHTML = name;
+          }
+          optionsContainer.classList.add("hidden");
+        };
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener("click", () => {
+        optionsContainer.classList.add("hidden");
+      });
+    }
+
+    // 3. Populate and wire up header filter dropdown
+    const filterOptionsContainer = document.getElementById("filter-proxy-country-options");
+    const filterTrigger = document.getElementById("filter-proxy-country-trigger");
+    const filterHiddenInput = document.getElementById("filter-proxy-country");
+    
+    if (filterOptionsContainer && filterTrigger && filterHiddenInput) {
+      filterOptionsContainer.innerHTML = `
+        <div class="custom-option" data-value="" data-text="-- All Countries --">
+          <span>-- All Countries --</span>
+        </div>
+        <div class="custom-option" data-value="unassigned" data-text="-- No Country --">
+          <span>-- No Country --</span>
+        </div>
+        ${Object.entries(countryFlagsData).map(([code, data]) => `
+          <div class="custom-option" data-value="${code}" data-text="${data.name}">
+            <span class="fi fi-${code.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block;"></span>
+            <span>${data.name}</span>
+          </div>
+        `).join("")}
+      `;
+      
+      // Toggle display
+      filterTrigger.onclick = (e) => {
+        e.stopPropagation();
+        // Close others
+        const modalOpts = document.getElementById("proxy-country-options");
+        if (modalOpts) modalOpts.classList.add("hidden");
+        document.querySelectorAll(".row-select-options").forEach(opt => opt.classList.add("hidden"));
+        
+        filterOptionsContainer.classList.toggle("hidden");
+      };
+      
+      // Select option
+      filterOptionsContainer.querySelectorAll(".custom-option").forEach(opt => {
+        opt.onclick = (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute("data-value");
+          const name = opt.getAttribute("data-text");
+          filterHiddenInput.value = val;
+          
+          if (val && val !== "unassigned") {
+            filterTrigger.querySelector("span").innerHTML = `
+              <span class="fi fi-${val.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block; vertical-align: middle; margin-right: 8px;"></span>
+              <span style="vertical-align: middle;">${name}</span>
+            `;
+          } else {
+            filterTrigger.querySelector("span").innerHTML = name;
+          }
+          filterOptionsContainer.classList.add("hidden");
+          renderProxiesTable();
+        };
+      });
+      
+      // Close when clicking outside
+      document.addEventListener("click", () => {
+        filterOptionsContainer.classList.add("hidden");
+      });
+    }
+  } catch (err) {
+    console.error("Failed to load country list:", err);
+  }
+}
+
+function getFlagEmoji(label) {
+  if (!label) return "";
+  const cleaned = label.trim();
+  
+  // Match 2-letter country code at start of label (e.g. US_Chicago, CA-Toronto, IN)
+  const match = cleaned.match(/^([a-zA-Z]{2})(?:[_-\s]|$)/);
+  if (match) {
+    const countryCode = match[1].toUpperCase();
+    if (countryFlagsData && countryFlagsData[countryCode]) {
+      return countryFlagsData[countryCode].emoji;
+    }
+    try {
+      const codePoints = countryCode
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+      return String.fromCodePoint(...codePoints);
+    } catch (e) {
+      return "";
+    }
+  }
+  
+  // Fallbacks for full country names
+  const lower = cleaned.toLowerCase();
+  
+  // Try to match name from loaded library
+  if (countryFlagsData) {
+    for (const [code, data] of Object.entries(countryFlagsData)) {
+      if (lower === data.name.toLowerCase() || lower.includes(data.name.toLowerCase())) {
+        return data.emoji;
+      }
+    }
+  }
+  
+  if (lower.includes("united states") || lower.includes("america") || lower.includes("usa")) return "🇺🇸";
+  if (lower.includes("canada")) return "🇨🇦";
+  if (lower.includes("germany")) return "🇩🇪";
+  if (lower.includes("france")) return "🇫🇷";
+  if (lower.includes("india")) return "🇮🇳";
+  if (lower.includes("united kingdom") || lower.includes("england") || lower.includes("uk")) return "🇬🇧";
+  if (lower.includes("australia")) return "🇦🇺";
+  if (lower.includes("singapore")) return "🇸🇬";
+  if (lower.includes("netherlands")) return "🇳🇱";
+  if (lower.includes("ukraine")) return "🇺🇦";
+  if (lower.includes("italy")) return "🇮🇹";
+  if (lower.includes("spain")) return "🇪🇸";
+  if (lower.includes("japan")) return "🇯🇵";
+  if (lower.includes("china")) return "🇨🇳";
+  if (lower.includes("brazil")) return "🇧🇷";
+  
+  return "";
+}
+
 // --- Proxies ---
 let currentProxiesList = []; // stores parsed proxy objects for easy addition/deletion
 
 async function loadProxies() {
   const data = await API.getProxies();
-  el.proxiesTextarea.value = data.proxies;
   
   // Parse raw proxies to currentProxiesList
   const proxyLines = (data.proxies || "")
@@ -247,20 +480,60 @@ async function loadProxies() {
 }
 
 function renderProxiesTable() {
-  if (currentProxiesList.length === 0) {
-    el.proxiesTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 20px;">No proxies configured. Click "+ New Proxy" to add your first proxy!</td></tr>`;
+  const filterVal = document.getElementById("filter-proxy-country")?.value || "";
+  
+  let filteredList = currentProxiesList;
+  if (filterVal === "unassigned") {
+    filteredList = currentProxiesList.filter(p => !p.label);
+  } else if (filterVal) {
+    filteredList = currentProxiesList.filter(p => p.label === filterVal);
+  }
+  
+  if (filteredList.length === 0) {
+    el.proxiesTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 20px;">No proxies found matching filter.</td></tr>`;
     return;
   }
   
-  el.proxiesTbody.innerHTML = currentProxiesList.map((p, index) => `
-    <tr>
-      <td><strong style="color: #60a5fa">${p.host}:${p.port}</strong></td>
-      <td><code>${p.username || '-'}</code></td>
-      <td><code>${p.password ? '••••••••' : '-'}</code></td>
-      <td><span class="platform-badge platform-ebay" style="background: rgba(96, 165, 250, 0.1); color: #60a5fa;">${p.label || 'Default'}</span></td>
-      <td><button class="danger-btn" onclick="deleteProxyAtIndex(${index})">Delete</button></td>
-    </tr>
-  `).join("");
+  el.proxiesTbody.innerHTML = filteredList.map(p => {
+    const originalIndex = currentProxiesList.indexOf(p);
+    const labelVal = p.label || "";
+    const countryName = labelVal ? (countryFlagsData[labelVal]?.name || labelVal) : "-- No Country --";
+    
+    // Generate custom dropdown list containing CSS flags for each row
+    const customSelect = `
+      <div class="row-select">
+        <div class="row-select-trigger" onclick="toggleRowSelect(${originalIndex}, event)">
+          ${getFlagImgHtml(p.label, p.host)}
+          <span>${countryName}</span>
+          <span style="font-size: 0.75rem; color: var(--text-secondary);">▼</span>
+        </div>
+        <div class="row-select-options hidden" id="row-select-options-${originalIndex}">
+          <div class="row-option" onclick="changeProxyCountry(${originalIndex}, '')">
+            <span style="display:inline-block; width:20px; height:15px; margin-right:4px;"></span>
+            <span>-- No Country --</span>
+          </div>
+          ${Object.entries(countryFlagsData || {}).map(([code, data]) => `
+            <div class="row-option" onclick="changeProxyCountry(${originalIndex}, '${code}')">
+              <span class="fi fi-${code.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block;"></span>
+              <span>${data.name}</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+    
+    return `
+      <tr>
+        <td><strong style="color: #60a5fa">${p.host}:${p.port}</strong></td>
+        <td><code>${p.username || '-'}</code></td>
+        <td><code>${p.password ? '••••••••' : '-'}</code></td>
+        <td>
+          ${customSelect}
+        </td>
+        <td><button class="danger-btn" onclick="deleteProxyAtIndex(${originalIndex})">Delete</button></td>
+      </tr>
+    `;
+  }).join("");
 }
 
 // Function to save the current currentProxiesList back as raw text
@@ -279,9 +552,36 @@ async function saveProxiesList() {
     return line;
   }).join("\n");
   
-  el.proxiesTextarea.value = rawText;
   await API.saveProxies(rawText);
 }
+
+// Handler to toggle row country select dropdown
+window.toggleRowSelect = (index, event) => {
+  event.stopPropagation();
+  // Close any other open dropdowns first
+  document.querySelectorAll(".row-select-options").forEach(opt => {
+    if (opt.id !== `row-select-options-${index}`) {
+      opt.classList.add("hidden");
+    }
+  });
+  const opt = document.getElementById(`row-select-options-${index}`);
+  if (opt) opt.classList.toggle("hidden");
+};
+
+// Close all row dropdowns when clicking outside
+document.addEventListener("click", () => {
+  document.querySelectorAll(".row-select-options").forEach(opt => {
+    opt.classList.add("hidden");
+  });
+});
+
+// Handler to update country from table dropdown
+window.changeProxyCountry = async (index, countryCode) => {
+  currentProxiesList[index].label = countryCode;
+  await saveProxiesList();
+  renderProxiesTable();
+  loadAccounts(); // Sync account dropdown labels
+};
 
 // Handler to delete a proxy
 window.deleteProxyAtIndex = async (index) => {
@@ -294,23 +594,64 @@ window.deleteProxyAtIndex = async (index) => {
 };
 
 // Modal events for Add Proxy
-el.addProxyModalBtn.onclick = () => el.modalAddProxy.classList.remove("hidden");
+el.addProxyModalBtn.onclick = () => {
+  el.proxyBulkInput.value = "";
+  el.proxyCountry.value = "";
+  const triggerSpan = document.querySelector("#proxy-country-trigger span");
+  if (triggerSpan) triggerSpan.innerHTML = "-- Select Country (Optional) --";
+  el.modalAddProxy.classList.remove("hidden");
+};
 el.cancelProxyBtn.onclick = () => el.modalAddProxy.classList.add("hidden");
 
-// Handler to add a new proxy via form
+// Handler to add new proxies via form (multi-line bulk support with optional country override)
 el.addProxyBtn.onclick = async () => {
-  const host = el.proxyHost.value.trim();
-  const port = el.proxyPort.value.trim();
-  const username = el.proxyUsername.value.trim();
-  const password = el.proxyPassword.value.trim();
-  const label = el.proxyLabel.value.trim();
+  const rawText = el.proxyBulkInput.value.trim();
+  const selectedCountry = el.proxyCountry.value; // Get selected country from modal dropdown
   
-  if (!host || !port) {
-    return alert("IP/Host and Port are required!");
+  if (!rawText) return alert("Please enter at least one proxy!");
+  
+  const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  let addedCount = 0;
+  
+  lines.forEach(line => {
+    const [proxyPart, labelPart] = line.split("#");
+    const parts = proxyPart.split(":");
+    const host = parts[0] || "";
+    const port = parts[1] || "";
+    const username = parts[2] || "";
+    const password = parts[3] || "";
+    
+    if (host && port) {
+      // Use line label if present, otherwise default to selected country
+      let label = labelPart ? labelPart.trim() : selectedCountry;
+      
+      // Auto-detect country code from label prefix if provided
+      if (label) {
+        const match = label.match(/^([a-zA-Z]{2})(?:[_-\s]|$)/);
+        if (match) {
+          label = match[1].toUpperCase();
+        } else {
+          // Match full name
+          const lower = label.toLowerCase();
+          if (countryFlagsData) {
+            for (const [code, data] of Object.entries(countryFlagsData)) {
+              if (lower === data.name.toLowerCase() || lower.includes(data.name.toLowerCase())) {
+                label = code.toUpperCase();
+                break;
+              }
+            }
+          }
+        }
+      }
+      
+      currentProxiesList.push({ host, port, username, password, label });
+      addedCount++;
+    }
+  });
+  
+  if (addedCount === 0) {
+    return alert("No valid proxies found. Format: host:port:username:password#label");
   }
-  
-  const newProxy = { host, port, username, password, label };
-  currentProxiesList.push(newProxy);
   
   el.addProxyBtn.textContent = "Adding...";
   await saveProxiesList();
@@ -318,42 +659,13 @@ el.addProxyBtn.onclick = async () => {
   loadAccounts(); // Update assignments dropdown
   
   // Clear inputs
-  el.proxyHost.value = "";
-  el.proxyPort.value = "";
-  el.proxyUsername.value = "";
-  el.proxyPassword.value = "";
-  el.proxyLabel.value = "";
+  el.proxyBulkInput.value = "";
+  el.proxyCountry.value = "";
+  const triggerSpan = document.querySelector("#proxy-country-trigger span");
+  if (triggerSpan) triggerSpan.innerHTML = "-- Select Country (Optional) --";
   
   el.addProxyBtn.textContent = "Add Proxy";
   el.modalAddProxy.classList.add("hidden");
-};
-
-// Bulk Save Button Click
-el.saveProxiesBtn.onclick = async () => {
-  el.saveProxiesBtn.textContent = "Saving...";
-  await API.saveProxies(el.proxiesTextarea.value);
-  // Reload model list from textarea
-  await loadProxies();
-  setTimeout(() => el.saveProxiesBtn.textContent = "Save Proxies", 1000);
-};
-
-// View Toggler
-let bulkEditMode = false;
-el.toggleProxyViewBtn.onclick = () => {
-  bulkEditMode = !bulkEditMode;
-  if (bulkEditMode) {
-    el.proxyManualView.classList.add("hidden");
-    el.proxyBulkView.classList.remove("hidden");
-    el.toggleProxyViewBtn.textContent = "Switch to Table View";
-    el.addProxyModalBtn.classList.add("hidden");
-  } else {
-    el.proxyManualView.classList.remove("hidden");
-    el.proxyBulkView.classList.add("hidden");
-    el.toggleProxyViewBtn.textContent = "Switch to Bulk Edit";
-    el.addProxyModalBtn.classList.remove("hidden");
-    // Sync textarea changes back to table
-    loadProxies();
-  }
 };
 
 // --- Cookies ---
@@ -424,10 +736,31 @@ async function loadAccounts() {
     const parsedProxies = proxyLines.map(line => {
       const [proxyPart, label] = line.split("#");
       const [host, port] = proxyPart.split(":");
+      
+      let flag = "";
+      let labelText = label ? label.trim() : "";
+      
+      if (labelText) {
+        flag = getFlagEmoji(labelText);
+      } else {
+        const ip = host;
+        if (ipCountryCache[ip]) {
+          const code = ipCountryCache[ip].toUpperCase();
+          if (countryFlagsData && countryFlagsData[code]) {
+            flag = countryFlagsData[code].emoji;
+          }
+        } else {
+          triggerIpLookup(ip);
+        }
+      }
+      
+      const displayText = labelText 
+        ? `${flag ? flag + ' ' : ''}${host}:${port} (${labelText})` 
+        : `${flag ? flag + ' ' : ''}${host}:${port}`;
       return {
         key: `${host}:${port}`,
-        label: label ? label.trim() : "",
-        displayText: label ? `${host}:${port} (${label.trim()})` : `${host}:${port}`
+        label: labelText,
+        displayText: displayText
       };
     }).filter(p => p.key);
     
