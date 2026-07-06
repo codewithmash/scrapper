@@ -145,9 +145,14 @@ async function loadSearches() {
     <tr>
       <td><span class="platform-badge platform-${s.platform}">${s.platform}</span></td>
       <td><strong>${s.keyword}</strong></td>
-      <td>${s.location || '-'}</td>
-      <td>${s.minPrice || '-'}</td>
-      <td>${s.maxPrice || '-'}</td>
+      <td>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          ${getFlagImgHtml(s.location)}
+          <span style="vertical-align: middle;">${s.location || '-'}</span>
+        </div>
+      </td>
+      <td>${s.minPrice !== null && s.minPrice !== undefined ? `$${s.minPrice}` : '-'}</td>
+      <td>${s.maxPrice !== null && s.maxPrice !== undefined ? `$${s.maxPrice}` : '-'}</td>
       <td><button class="danger-btn" onclick="deleteSearch(${s.id})">Delete</button></td>
     </tr>
   `).join("");
@@ -159,7 +164,17 @@ window.deleteSearch = async (id) => {
   loadSearches();
 };
 
-el.addSearchBtn.onclick = () => el.modalAddSearch.classList.remove("hidden");
+el.addSearchBtn.onclick = () => {
+  document.getElementById("new-keyword").value = "";
+  document.getElementById("new-location").value = "";
+  document.getElementById("new-min").value = "";
+  document.getElementById("new-max").value = "";
+  
+  const triggerSpan = document.querySelector("#new-country-trigger span");
+  if (triggerSpan) triggerSpan.innerHTML = "-- Select Country (Optional) --";
+  
+  el.modalAddSearch.classList.remove("hidden");
+};
 el.cancelSearchBtn.onclick = () => el.modalAddSearch.classList.add("hidden");
 
 el.saveSearchBtn.onclick = async () => {
@@ -178,6 +193,13 @@ el.saveSearchBtn.onclick = async () => {
   el.modalAddSearch.classList.add("hidden");
   
   document.getElementById("new-keyword").value = "";
+  document.getElementById("new-location").value = "";
+  document.getElementById("new-min").value = "";
+  document.getElementById("new-max").value = "";
+  
+  const triggerSpan = document.querySelector("#new-country-trigger span");
+  if (triggerSpan) triggerSpan.innerHTML = "-- Select Country (Optional) --";
+  
   loadSearches();
 };
 
@@ -392,6 +414,63 @@ async function loadCountriesDropdown() {
       // Close when clicking outside
       document.addEventListener("click", () => {
         filterOptionsContainer.classList.add("hidden");
+      });
+    }
+
+    // 4. Populate and wire up Add Search Monitor country select dropdown
+    const searchOptionsContainer = document.getElementById("new-country-options");
+    const searchSelectTrigger = document.getElementById("new-country-trigger");
+    const searchHiddenInput = document.getElementById("new-location");
+    
+    if (searchOptionsContainer && searchSelectTrigger && searchHiddenInput) {
+      searchOptionsContainer.innerHTML = `
+        <div class="custom-option" data-value="" data-text="-- Select Country (Optional) --">
+          -- Select Country (Optional) --
+        </div>
+        ${Object.entries(countryFlagsData).map(([code, data]) => `
+          <div class="custom-option" data-value="${code}" data-text="${data.name}">
+            <span class="fi fi-${code.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block;"></span>
+            <span>${data.name}</span>
+          </div>
+        `).join("")}
+      `;
+      
+      // Toggle display
+      searchSelectTrigger.onclick = (e) => {
+        e.stopPropagation();
+        // Close others
+        const proxyOpts = document.getElementById("proxy-country-options");
+        if (proxyOpts) proxyOpts.classList.add("hidden");
+        const filterOpts = document.getElementById("filter-proxy-country-options");
+        if (filterOpts) filterOpts.classList.add("hidden");
+        document.querySelectorAll(".row-select-options").forEach(opt => opt.classList.add("hidden"));
+        
+        searchOptionsContainer.classList.toggle("hidden");
+      };
+      
+      // Select option
+      searchOptionsContainer.querySelectorAll(".custom-option").forEach(opt => {
+        opt.onclick = (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute("data-value");
+          const name = opt.getAttribute("data-text");
+          searchHiddenInput.value = val;
+          
+          if (val) {
+            searchSelectTrigger.querySelector("span").innerHTML = `
+              <span class="fi fi-${val.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block; vertical-align: middle; margin-right: 8px;"></span>
+              <span style="vertical-align: middle;">${name}</span>
+            `;
+          } else {
+            searchSelectTrigger.querySelector("span").innerHTML = name;
+          }
+          searchOptionsContainer.classList.add("hidden");
+        };
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener("click", () => {
+        searchOptionsContainer.classList.add("hidden");
       });
     }
   } catch (err) {
@@ -673,12 +752,15 @@ async function loadCookies() {
   const data = await API.getCookies();
   el.cookiesList.innerHTML = data.cookies.map(c => `
     <li>
-      <span>${c}</span>
-      <button class="danger-btn" onclick="deleteCookie('${c}')">Remove</button>
+      <div class="cookie-file-details">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color); flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <span class="cookie-filename" title="${c}">${c}</span>
+      </div>
+      <button class="danger-btn" onclick="deleteCookie('${c}')" style="padding: 6px 12px; font-size: 0.8rem; margin: 0;">Remove</button>
     </li>
   `).join("");
   if(data.cookies.length === 0) {
-    el.cookiesList.innerHTML = '<li><span style="color:var(--text-secondary)">No cookies uploaded yet.</span></li>';
+    el.cookiesList.innerHTML = '<li style="grid-column: 1 / -1; justify-content: center; padding: 20px;"><span style="color:var(--text-secondary)">No cookies uploaded yet.</span></li>';
   }
 }
 
@@ -689,10 +771,14 @@ window.deleteCookie = async (filename) => {
 };
 
 // Drag & Drop / File Input
+el.cookieDropzone.onclick = () => {
+  el.cookieFile.click();
+};
 el.cookieDropzone.ondragover = (e) => { e.preventDefault(); el.cookieDropzone.classList.add("dragover"); };
 el.cookieDropzone.ondragleave = () => el.cookieDropzone.classList.remove("dragover");
 el.cookieDropzone.ondrop = (e) => {
   e.preventDefault();
+  e.stopPropagation();
   el.cookieDropzone.classList.remove("dragover");
   if (e.dataTransfer.files[0]) handleCookieFile(e.dataTransfer.files[0]);
 };

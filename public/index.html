@@ -112,14 +112,24 @@
         
         <div class="metrics-grid">
           <div class="glass-panel metric-card">
-            <h3>Avg Capture Delay</h3>
-            <p id="avg-latency">-- s</p>
-            <span class="subtitle">Time between posting & scraping (last 24h)</span>
+            <div class="metric-info">
+              <h3>Avg Capture Delay</h3>
+              <p id="avg-latency">-- s</p>
+              <span class="subtitle">Time between posting & scraping (last 24h)</span>
+            </div>
+            <div class="metric-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
           </div>
           <div class="glass-panel metric-card">
-            <h3>Success Rate (Global)</h3>
-            <p id="global-success-rate">-- %</p>
-            <span class="subtitle">Combined search polling success rate</span>
+            <div class="metric-info">
+              <h3>Success Rate (Global)</h3>
+              <p id="global-success-rate">-- %</p>
+              <span class="subtitle">Combined search polling success rate</span>
+            </div>
+            <div class="metric-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
           </div>
         </div>
 
@@ -158,8 +168,18 @@
         </div>
 
         <h2 class="section-title">Recent System Logs</h2>
-        <div class="glass-panel console-log" id="logs-container">
-          <!-- JS injected -->
+        <div class="console-wrapper">
+          <div class="console-header">
+            <div class="console-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="console-title">system_logs.log</div>
+          </div>
+          <div class="console-log" id="logs-container">
+            <!-- JS injected -->
+          </div>
         </div>
       </div>
 
@@ -167,16 +187,24 @@
         <header>
           <h1>Facebook Cookies</h1>
         </header>
-        <div class="glass-panel">
-          <p class="subtitle">Upload JSON cookie files extracted from Playwright to prevent blocks.</p>
+        <div class="glass-panel" style="padding: 24px;">
+          <p class="subtitle" style="margin-bottom: 24px;">Upload JSON cookie files extracted from Playwright to prevent blocks.</p>
           
           <div class="upload-area" id="cookie-dropzone">
-            <p>Drag & Drop a cookie .json file here</p>
-            <span class="or">OR</span>
-            <input type="file" id="cookie-file" accept=".json" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p class="upload-title">Drag & Drop a cookie <code>.json</code> file here</p>
+            <p class="upload-subtitle">or click anywhere inside this box to browse</p>
+            <input type="file" id="cookie-file" accept=".json" style="display: none;" />
           </div>
 
-          <h3>Active Cookie Files</h3>
+          <h3 class="cookie-title-section">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
+            Active Cookie Files
+          </h3>
           <ul id="cookies-list" class="item-list">
             <!-- JS injected -->
           </ul>
@@ -247,8 +275,17 @@
         <input type="text" id="new-keyword" placeholder="e.g. iphone 15" />
       </div>
       <div class="form-group">
-        <label>Location Slug</label>
-        <input type="text" id="new-location" placeholder="e.g. toronto (Optional)" />
+        <label>Country (Optional)</label>
+        <div class="custom-select" id="new-country-select">
+          <div class="custom-select-trigger" id="new-country-trigger">
+            <span>-- Select Country (Optional) --</span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">▼</span>
+          </div>
+          <div class="custom-select-options hidden" id="new-country-options" style="max-height: 180px;">
+            <!-- JS populated -->
+          </div>
+        </div>
+        <input type="hidden" id="new-location" value="" />
       </div>
       <div class="form-row">
         <div class="form-group">
