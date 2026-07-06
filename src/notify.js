@@ -73,3 +73,48 @@ export async function pushNewListings(listings, topic = config.fcm.defaultTopic)
     }
   }
 }
+
+/**
+ * Sends a health alert notification to operators via Telegram and FCM.
+ * @param {string} text the message text
+ */
+export async function pushAlert(text) {
+  const m = getMessaging();
+  const { botToken, chatId } = config.telegram;
+
+  // 1. Send FCM Alert
+  if (m) {
+    const message = {
+      topic: "alerts",
+      notification: {
+        title: "⚠️ Scraper Alert",
+        body: text,
+      },
+    };
+    try {
+      await m.send(message);
+      console.log("[notify] Sent FCM health alert");
+    } catch (err) {
+      console.error("[notify] FCM health alert send failed:", err.message);
+    }
+  }
+
+  // 2. Send Telegram Alert
+  if (botToken && chatId) {
+    const markdownText = `⚠️ **Scraper System Alert**\n\n${text}`;
+    try {
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: markdownText,
+          parse_mode: "Markdown"
+        }),
+      });
+      console.log("[notify] Sent Telegram health alert");
+    } catch (err) {
+      console.error("[notify] Telegram health alert send failed:", err.message);
+    }
+  }
+}

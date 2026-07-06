@@ -320,3 +320,99 @@ textarea:focus, input:focus, select:focus {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Metrics Dashboard Grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.metric-card {
+  padding: 24px;
+  text-align: center;
+}
+
+.metric-card h3 {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.metric-card p {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 32px 0 16px;
+  color: var(--text-primary);
+}
+
+/* Status selects and inputs */
+.status-select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  width: auto;
+  cursor: pointer;
+  text-align: center;
+}
+
+.status-select.status-healthy { background: rgba(34, 197, 94, 0.2); color: #4ade80; border-color: rgba(34, 197, 94, 0.4); }
+.status-select.status-flagged { background: rgba(234, 179, 8, 0.2); color: #facc15; border-color: rgba(234, 179, 8, 0.4); }
+.status-select.status-cooling_down { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border-color: rgba(59, 130, 246, 0.4); }
+.status-select.status-dead { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+
+.assignment-select {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  width: 100%;
+  max-width: 240px;
+}
+
+/* Console Log */
+.console-log {
+  background: #090d16;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 16px;
+  height: 250px;
+  overflow-y: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #a1a1aa;
+}
+
+.log-line {
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  padding-bottom: 4px;
+}
+
+.log-line:last-child {
+  border-bottom: none;
+}
+
+.log-time { color: #71717a; }
+.log-account { color: #38bdf8; font-weight: bold; }
+.log-type { font-weight: bold; }
+
+.log-type-success .log-type { color: #4ade80; }
+.log-type-error .log-type { color: #f87171; }
+.log-type-alert .log-type { color: #facc15; }
+.log-type-info .log-type { color: #a1a1aa; }
+
+.log-type-success .log-msg { color: #e4e4e7; }
+.log-type-error .log-msg { color: #fca5a5; }
+.log-type-alert .log-msg { color: #fef08a; }
+.log-type-info .log-msg { color: #d4d4d8; }

@@ -1,5 +1,5 @@
 import { config } from "./config.js";
-import { filterAndRecordNew, getSearches } from "./db.js";
+import { filterAndRecordNew, getSearches, recordPollingMetric } from "./db.js";
 import { pushNewListings } from "./notify.js";
 import { scrapeEbay } from "./scrapers/ebay.js";
 import { scrapeOfferUp } from "./scrapers/offerup.js";
@@ -23,6 +23,7 @@ async function runPlatform(platform) {
   if (searches.length === 0) return;
 
   for (const search of searches) {
+    const startTime = Date.now();
     try {
       console.log(`[${platform}] 🔍 Scraping "${search.keyword}"...`);
       const listings = await SCRAPERS[platform](search);
@@ -31,8 +32,14 @@ async function runPlatform(platform) {
       if (fresh.length > 0) {
         await pushNewListings(fresh);
       }
+      if (platform !== "facebook") {
+        recordPollingMetric(platform, search.id, 1, Date.now() - startTime, listings.length, null);
+      }
     } catch (err) {
       console.error(`[${platform}] ❌ search "${search.keyword}" failed:`, err.message);
+      if (platform !== "facebook") {
+        recordPollingMetric(platform, search.id, 0, Date.now() - startTime, 0, null);
+      }
     }
     // Small stagger between searches on the same platform.
     await new Promise((r) => setTimeout(r, 1500));

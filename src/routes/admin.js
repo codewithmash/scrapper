@@ -2,7 +2,18 @@ import express from "express";
 import fs from "node:fs";
 import path from "node:path";
 import { config } from "../config.js";
-import { getSearches, addSearch, deleteSearch } from "../db.js";
+import { 
+  getSearches, 
+  addSearch, 
+  deleteSearch, 
+  getAccounts, 
+  updateAccountStatus, 
+  updateAccountAssignment, 
+  deleteAccount, 
+  getPollingMetrics, 
+  syncAccountsWithDisk 
+} from "../db.js";
+import { loadCookieFiles } from "../sessions.js";
 
 const router = express.Router();
 
@@ -93,6 +104,11 @@ router.post("/cookies", (req, res) => {
 
     fs.mkdirSync(config.facebook.cookiesDir, { recursive: true });
     fs.writeFileSync(path.join(config.facebook.cookiesDir, filename), JSON.stringify(normalizedContent, null, 2));
+    
+    // Sync DB with disk
+    const filenames = loadCookieFiles().map(p => path.basename(p));
+    syncAccountsWithDisk(filenames);
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -105,10 +121,43 @@ router.delete("/cookies/:filename", (req, res) => {
     if (fs.existsSync(target)) {
       fs.unlinkSync(target);
     }
+    
+    // Sync DB with disk
+    const filenames = loadCookieFiles().map(p => path.basename(p));
+    syncAccountsWithDisk(filenames);
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// --- Accounts ---
+router.get("/accounts", (req, res) => {
+  res.json(getAccounts());
+});
+
+router.post("/accounts/status", (req, res) => {
+  const { id, status } = req.body;
+  if (!id || !status) {
+    return res.status(400).json({ error: "id and status required" });
+  }
+  updateAccountStatus(id, status);
+  res.json({ success: true });
+});
+
+router.post("/accounts/assign", (req, res) => {
+  const { id, searchId } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "id required" });
+  }
+  updateAccountAssignment(id, searchId);
+  res.json({ success: true });
+});
+
+// --- Metrics ---
+router.get("/metrics", (req, res) => {
+  res.json(getPollingMetrics());
 });
 
 export default router;

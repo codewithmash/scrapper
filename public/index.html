@@ -26,6 +26,8 @@
       <nav>
         <button class="nav-btn" data-tab="tab-listings">Recent Listings</button>
         <button class="nav-btn active" data-tab="tab-searches">Searches</button>
+        <button class="nav-btn" data-tab="tab-accounts">FB Accounts</button>
+        <button class="nav-btn" data-tab="tab-metrics">Metrics & Logs</button>
         <button class="nav-btn" data-tab="tab-cookies">FB Cookies</button>
         <button class="nav-btn" data-tab="tab-proxies">Proxies</button>
       </nav>
@@ -67,6 +69,88 @@
               <!-- JS injected -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div id="tab-accounts" class="tab-pane hidden">
+        <header>
+          <h1>Facebook Accounts</h1>
+        </header>
+        <div class="glass-panel table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Account ID (File)</th>
+                <th>Status</th>
+                <th>Assigned Search / City</th>
+                <th>Success Count</th>
+                <th>Error Count</th>
+                <th>Last Used</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="accounts-tbody">
+              <!-- JS injected -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-metrics" class="tab-pane hidden">
+        <header>
+          <h1>Metrics & Logs</h1>
+        </header>
+        
+        <div class="metrics-grid">
+          <div class="glass-panel metric-card">
+            <h3>Avg Capture Delay</h3>
+            <p id="avg-latency">-- s</p>
+            <span class="subtitle">Time between posting & scraping (last 24h)</span>
+          </div>
+          <div class="glass-panel metric-card">
+            <h3>Success Rate (Global)</h3>
+            <p id="global-success-rate">-- %</p>
+            <span class="subtitle">Combined search polling success rate</span>
+          </div>
+        </div>
+
+        <h2 class="section-title">Per-Location Capture Latency</h2>
+        <div class="glass-panel table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Location / City</th>
+                <th>Average Capture Delay</th>
+              </tr>
+            </thead>
+            <tbody id="latency-tbody">
+              <!-- JS injected -->
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="section-title">Polling Success Rates</h2>
+        <div class="glass-panel table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Search Keyword</th>
+                <th>Location</th>
+                <th>Success Rate (24h)</th>
+                <th>Avg Duration</th>
+              </tr>
+            </thead>
+            <tbody id="metrics-tbody">
+              <!-- JS injected -->
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="section-title">Recent System Logs</h2>
+        <div class="glass-panel console-log" id="logs-container">
+          <!-- JS injected -->
         </div>
       </div>
 

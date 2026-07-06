@@ -28,6 +28,36 @@ db.exec(`
     maxPrice     REAL,
     created_at   TEXT DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS facebook_accounts (
+    id                   TEXT PRIMARY KEY,
+    status               TEXT NOT NULL DEFAULT 'healthy',
+    assigned_search_id   INTEGER DEFAULT NULL,
+    error_count          INTEGER DEFAULT 0,
+    success_count        INTEGER DEFAULT 0,
+    last_used            TEXT,
+    created_at           TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(assigned_search_id) REFERENCES searches(id) ON DELETE SET NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS health_logs (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id   TEXT,
+    timestamp    TEXT DEFAULT CURRENT_TIMESTAMP,
+    type         TEXT NOT NULL,
+    message      TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS polling_metrics (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp    TEXT DEFAULT CURRENT_TIMESTAMP,
+    platform     TEXT NOT NULL,
+    search_id    INTEGER NOT NULL,
+    success      INTEGER NOT NULL,
+    duration_ms  INTEGER NOT NULL,
+    items_found  INTEGER NOT NULL,
+    account_id   TEXT DEFAULT NULL
+  );
 `);
 
 const getSearchesStmt = db.prepare("SELECT * FROM searches ORDER BY created_at ASC");
@@ -36,6 +66,50 @@ const addSearchStmt = db.prepare(`
   VALUES (@platform, @keyword, @location, @minPrice, @maxPrice)
 `);
 const deleteSearchStmt = db.prepare("DELETE FROM searches WHERE id = @id");
+
+const addAccountStmt = db.prepare(`
+  INSERT OR IGNORE INTO facebook_accounts (id, status)
+  VALUES (@id, @status)
+`);
+const getAccountsStmt = db.prepare(`
+  SELECT a.*, s.keyword as assigned_keyword, s.location as assigned_location
+  FROM facebook_accounts a
+  LEFT JOIN searches s ON a.assigned_search_id = s.id
+  ORDER BY a.created_at DESC
+`);
+const updateAccountStatusStmt = db.prepare(`
+  UPDATE facebook_accounts
+  SET status = @status
+  WHERE id = @id
+`);
+const updateAccountStatsSuccessStmt = db.prepare(`
+  UPDATE facebook_accounts
+  SET success_count = success_count + 1, error_count = 0, last_used = @last_used, status = 'healthy'
+  WHERE id = @id
+`);
+const updateAccountStatsFailureStmt = db.prepare(`
+  UPDATE facebook_accounts
+  SET error_count = error_count + 1, last_used = @last_used
+  WHERE id = @id
+`);
+const updateAccountAssignmentStmt = db.prepare(`
+  UPDATE facebook_accounts
+  SET assigned_search_id = @search_id
+  WHERE id = @id
+`);
+const deleteAccountStmt = db.prepare(`
+  DELETE FROM facebook_accounts
+  WHERE id = @id
+`);
+
+const logHealthEventStmt = db.prepare(`
+  INSERT INTO health_logs (account_id, type, message)
+  VALUES (@account_id, @type, @message)
+`);
+const recordPollingMetricStmt = db.prepare(`
+  INSERT INTO polling_metrics (platform, search_id, success, duration_ms, items_found, account_id)
+  VALUES (@platform, @search_id, @success, @duration_ms, @items_found, @account_id)
+`);
 
 const insertStmt = db.prepare(
   `INSERT OR IGNORE INTO seen_listings (platform, listing_id, first_seen, payload)
@@ -101,6 +175,93 @@ export function addSearch(search) {
 
 export function deleteSearch(id) {
   deleteSearchStmt.run({ id });
+}
+
+export function getAccounts() {
+  return getAccountsStmt.all();
+}
+
+export function updateAccountStatus(id, status) {
+  updateAccountStatusStmt.run({ id, status });
+}
+
+export function updateAccountStats(id, success) {
+  const now = new Date().toISOString();
+  if (success) {
+    updateAccountStatsSuccessStmt.run({ id, last_used: now });
+  } else {
+    updateAccountStatsFailureStmt.run({ id, last_used: now });
+  }
+}
+
+export function updateAccountAssignment(id, searchId) {
+  const search_id = searchId ? parseInt(searchId, 10) : null;
+  updateAccountAssignmentStmt.run({ id, search_id });
+}
+
+export function deleteAccount(id) {
+  deleteAccountStmt.run({ id });
+}
+
+export function logHealthEvent(accountId, type, message) {
+  logHealthEventStmt.run({ account_id: accountId, type, message });
+}
+
+export function recordPollingMetric(platform, searchId, success, durationMs, itemsFound, accountId) {
+  recordPollingMetricStmt.run({
+    platform,
+    search_id: searchId,
+    success: success ? 1 : 0,
+    duration_ms: durationMs,
+    items_found: itemsFound,
+    account_id: accountId || null
+  });
+}
+
+export function syncAccountsWithDisk(diskFiles) {
+  const existing = db.prepare("SELECT id FROM facebook_accounts").all().map(a => a.id);
+  const diskSet = new Set(diskFiles);
+  
+  db.transaction(() => {
+    // Add new ones
+    for (const file of diskFiles) {
+      addAccountStmt.run({ id: file, status: "healthy" });
+    }
+    // Delete retired ones
+    for (const id of existing) {
+      if (!diskSet.has(id)) {
+        deleteAccountStmt.run({ id });
+      }
+    }
+  })();
+}
+
+export function getPollingMetrics() {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  
+  // 1. Success Rate & Avg Duration per Search
+  const metrics = db.prepare(`
+    SELECT platform, search_id, success, duration_ms, items_found, timestamp 
+    FROM polling_metrics 
+    WHERE timestamp >= ?
+  `).all(since);
+  
+  // 2. Health logs
+  const logs = db.prepare(`
+    SELECT id, account_id, timestamp, type, message 
+    FROM health_logs 
+    ORDER BY timestamp DESC 
+    LIMIT 50
+  `).all();
+  
+  // 3. Capture Latency from seen_listings
+  const listings = db.prepare(`
+    SELECT platform, location, first_seen, payload 
+    FROM seen_listings 
+    WHERE first_seen >= ?
+  `).all(since);
+  
+  return { metrics, logs, listings };
 }
 
 // Migration from config on startup

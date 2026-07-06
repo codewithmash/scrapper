@@ -2,10 +2,12 @@
 import { launchBrowser, defaultContextOptions, generateFingerprint, fingerprintInjector } from "../browser.js";
 import { createCursor } from "ghost-cursor";
 import { normalize, withinPrice } from "../normalize.js";
-import { makeRotator } from "../sessions.js";
+import { loadProxies } from "../sessions.js";
+import { config } from "../config.js";
+import db, { logHealthEvent, recordPollingMetric } from "../db.js";
+import { pushAlert } from "../notify.js";
 import fs from "node:fs";
-
-const rotator = makeRotator();
+import path from "node:path";
 
 function buildSearchUrl({ keyword, minPrice, maxPrice }) {
   const params = new URLSearchParams({ query: keyword, sortBy: "creation_time_descend" });
@@ -70,16 +72,64 @@ function mapNode(n, search) {
 }
 
 export async function scrapeFacebook(search) {
-  const maxSessions = Math.min(rotator.count() || 1, 10);
+  const startTime = Date.now();
+  
+  // 1. Get proxies and accounts
+  const proxies = loadProxies();
+  const activeAccounts = db.prepare("SELECT * FROM facebook_accounts WHERE status != 'dead'").all();
+  
+  if (activeAccounts.length === 0) {
+    console.warn("[facebook] No active Facebook accounts found in database.");
+    recordPollingMetric("facebook", search.id, 0, Date.now() - startTime, 0, null);
+    return [];
+  }
+  
+  // 2. Select candidates based on assignment & load balance
+  let candidates = [];
+  
+  // Search for accounts assigned to this specific search
+  const assigned = activeAccounts.filter(a => a.assigned_search_id === search.id);
+  if (assigned.length > 0) {
+    candidates = assigned;
+  } else {
+    // Round-robin / rotate across unassigned active accounts (sorted by last_used oldest first)
+    const unassigned = activeAccounts.filter(a => a.assigned_search_id === null);
+    if (unassigned.length > 0) {
+      unassigned.sort((a, b) => {
+        if (!a.last_used) return -1;
+        if (!b.last_used) return 1;
+        return new Date(a.last_used) - new Date(b.last_used);
+      });
+      candidates = unassigned;
+    } else {
+      // Fallback: rotate across any active account
+      activeAccounts.sort((a, b) => {
+        if (!a.last_used) return -1;
+        if (!b.last_used) return 1;
+        return new Date(a.last_used) - new Date(b.last_used);
+      });
+      candidates = activeAccounts;
+    }
+  }
 
-  for (let attempt = 0; attempt < maxSessions; attempt++) {
-    const { cookieFile, proxy } = rotator.next();
+  // 3. Try candidates one by one
+  for (const account of candidates) {
+    const cookieFile = path.join(config.facebook.cookiesDir, account.id);
+    let proxy = null;
+    if (proxies.length > 0) {
+      proxy = proxies[Math.floor(Math.random() * proxies.length)];
+    }
+    
     let browser;
-
     try {
+      if (!fs.existsSync(cookieFile)) {
+        console.warn(`[facebook] Cookie file not found: ${cookieFile}`);
+        db.prepare("DELETE FROM facebook_accounts WHERE id = ?").run(account.id);
+        continue;
+      }
+      
       browser = await launchBrowser({ proxy });
 
-      // Read and aggressively normalize the cookie on-the-fly to prevent Playwright crashes
       let cookieObj = { cookies: [], origins: [] };
       try {
         const raw = JSON.parse(fs.readFileSync(cookieFile, "utf-8"));
@@ -123,10 +173,26 @@ export async function scrapeFacebook(search) {
 
       if (await isBlocked(page)) {
         const blockedUrl = page.url();
-        console.warn(`[facebook] Session blocked → ${blockedUrl} (cookie: ${cookieFile})`);
+        console.warn(`[facebook] Session blocked → ${blockedUrl} (cookie: ${account.id})`);
         try { await page.screenshot({ path: `public/fb-blocked-debug.png` }); } catch(e) {}
         await browser.close();
-        continue;
+        
+        // Handle account failure
+        const newErrCount = account.error_count + 1;
+        let newStatus = "flagged";
+        if (newErrCount >= 3) {
+          newStatus = "dead";
+        }
+        db.prepare("UPDATE facebook_accounts SET error_count = ?, status = ?, last_used = ? WHERE id = ?")
+          .run(newErrCount, newStatus, new Date().toISOString(), account.id);
+        
+        logHealthEvent(account.id, "error", `Session blocked (login/captcha/block). URL: ${blockedUrl}. Consecutive errors: ${newErrCount}. Status updated to: ${newStatus}`);
+        
+        // Send immediate alert!
+        await pushAlert(`Facebook Account "${account.id}" marked as ${newStatus.toUpperCase()} due to blocks/login walls (errors: ${newErrCount}).`);
+        
+        recordPollingMetric("facebook", search.id, 0, Date.now() - startTime, 0, account.id);
+        continue; // Try next candidate
       }
 
       await simulateHumanBehavior(page, cursor);
@@ -141,11 +207,35 @@ export async function scrapeFacebook(search) {
 
       await browser.close();
 
-      return withinPrice(unique, search.minPrice, search.maxPrice);
+      // Successful scraping!
+      db.prepare("UPDATE facebook_accounts SET error_count = 0, success_count = success_count + 1, status = 'healthy', last_used = ? WHERE id = ?")
+        .run(new Date().toISOString(), account.id);
+      
+      logHealthEvent(account.id, "success", `Scraped search "${search.keyword}" for ${search.location || "default location"} successfully. Found ${unique.length} items.`);
+      
+      const filtered = withinPrice(unique, search.minPrice, search.maxPrice);
+      recordPollingMetric("facebook", search.id, 1, Date.now() - startTime, filtered.length, account.id);
+      
+      return filtered;
 
     } catch (err) {
-      console.error(`[facebook] Attempt failed:`, err.message);
+      console.error(`[facebook] Attempt with ${account.id} failed:`, err.message);
       if (browser) await browser.close().catch(() => {});
+      
+      // Update account stats on exception
+      const newErrCount = account.error_count + 1;
+      let newStatus = "flagged";
+      if (newErrCount >= 3) {
+        newStatus = "dead";
+      }
+      db.prepare("UPDATE facebook_accounts SET error_count = ?, status = ?, last_used = ? WHERE id = ?")
+        .run(newErrCount, newStatus, new Date().toISOString(), account.id);
+        
+      logHealthEvent(account.id, "error", `Playwright exception: ${err.message}. Consecutive errors: ${newErrCount}. Status updated to: ${newStatus}`);
+      
+      await pushAlert(`Facebook Account "${account.id}" marked as ${newStatus.toUpperCase()} due to Playwright exception: ${err.message}.`);
+      
+      recordPollingMetric("facebook", search.id, 0, Date.now() - startTime, 0, account.id);
     }
   }
 
