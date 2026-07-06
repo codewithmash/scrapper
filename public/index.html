@@ -21,7 +21,14 @@
   </div>
 
   <div id="dashboard" class="dashboard hidden">
-    <aside class="sidebar glass-panel">
+    <div class="mobile-header glass-panel">
+      <h2>MktAlerts</h2>
+      <button id="menu-toggle" class="secondary-btn">☰ Menu</button>
+    </div>
+    
+    <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+
+    <aside class="sidebar glass-panel" id="sidebar">
       <h2>MktAlerts</h2>
       <nav>
         <button class="nav-btn" data-tab="tab-listings">Recent Listings</button>

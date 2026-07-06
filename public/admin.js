@@ -466,5 +466,29 @@ async function loadMetrics() {
   }
 }
 
+// --- Mobile Sidebar Toggle ---
+const menuToggle = document.getElementById("menu-toggle");
+const sidebar = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+if (menuToggle && sidebar && sidebarOverlay) {
+  const toggleMenu = () => {
+    sidebar.classList.toggle("active");
+    sidebarOverlay.classList.toggle("hidden");
+  };
+  menuToggle.onclick = toggleMenu;
+  sidebarOverlay.onclick = toggleMenu;
+  
+  // Close menu when clicking navigation links on mobile
+  el.navBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (window.innerWidth < 768) {
+        sidebar.classList.remove("active");
+        sidebarOverlay.classList.add("hidden");
+      }
+    });
+  });
+}
+
 // Boot
 checkAuth();
