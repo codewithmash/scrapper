@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 import { config } from "./config.js";
+import { loadProxies } from "./sessions.js";
 
 // Ensure the directory for the SQLite file exists.
 fs.mkdirSync(path.dirname(config.dbPath), { recursive: true });
@@ -80,7 +81,7 @@ const addAccountStmt = db.prepare(`
   VALUES (@id, @status)
 `);
 const getAccountsStmt = db.prepare(`
-  SELECT a.*, s.keyword as assigned_keyword, s.location as assigned_location
+  SELECT a.id, a.status, a.assigned_search_id, a.error_count, a.success_count, a.last_used, a.created_at, a.assigned_proxy, s.keyword as assigned_keyword, s.location as assigned_location
   FROM facebook_accounts a
   LEFT JOIN searches s ON a.assigned_search_id = s.id
   ORDER BY a.created_at DESC
@@ -270,10 +271,19 @@ export function syncAccountsWithDisk(diskFiles) {
   const existing = db.prepare("SELECT id FROM facebook_accounts").all().map(a => a.id);
   const diskSet = new Set(diskFiles);
   
+  const proxies = loadProxies();
+  
   db.transaction(() => {
     // Add new ones
     for (const file of diskFiles) {
-      addAccountStmt.run({ id: file, status: "healthy" });
+      if (!existing.includes(file)) {
+        addAccountStmt.run({ id: file, status: "healthy" });
+        // Assign a random proxy permanently to this new account
+        if (proxies.length > 0) {
+          const randomProxy = proxies[Math.floor(Math.random() * proxies.length)].key;
+          updateAccountProxyStmt.run({ id: file, proxy: randomProxy });
+        }
+      }
     }
     // Delete retired ones
     for (const id of existing) {

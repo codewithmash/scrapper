@@ -9,11 +9,18 @@ import { pushAlert } from "../notify.js";
 import fs from "node:fs";
 import path from "node:path";
 
-function buildSearchUrl({ keyword, minPrice, maxPrice }) {
+function buildSearchUrl({ keyword, location, minPrice, maxPrice }) {
   const params = new URLSearchParams({ query: keyword, sortBy: "creation_time_descend" });
   if (minPrice != null) params.set("minPrice", String(minPrice));
   if (maxPrice != null) params.set("maxPrice", String(maxPrice));
-  // Use www.facebook.com marketplace search
+  
+  if (location) {
+    // Facebook accepts city names without spaces, e.g., 'sanfrancisco', 'newyork'
+    const city = encodeURIComponent(location.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    return `https://www.facebook.com/marketplace/${city}/search/?${params.toString()}`;
+  }
+  
+  // Use default www.facebook.com marketplace search (defaults to IP location)
   return `https://www.facebook.com/marketplace/search/?${params.toString()}`;
 }
 
@@ -55,7 +62,7 @@ function collectListings(node, out, depth = 0) {
 }
 
 function mapNode(n, search) {
-  const price = n.listing_price?.amount ?? n.formatted_price?.text ?? null;
+  const price = n.formatted_price?.text ?? n.listing_price?.amount ?? null;
   const image = n.primary_listing_photo?.image?.uri || n.listing_photos?.[0]?.image?.uri || null;
   const city = n.location?.reverse_geocode?.city_page?.display_name || n.location_text?.text || null;
 
@@ -189,8 +196,11 @@ export async function scrapeFacebook(search) {
         }
       });
 
-      await page.goto(buildSearchUrl(search), { waitUntil: "commit", timeout: 30000 });
-      await page.waitForSelector("body", { timeout: 10000 }).catch(() => {});
+      await page.goto(buildSearchUrl(search), { waitUntil: "domcontentloaded", timeout: 45000 });
+      // Wait for the main container or an item to show up, give it a bit more time for slow proxies
+      await page.waitForSelector('div[role="main"]', { timeout: 15000 }).catch(() => {});
+      // Add a hard wait for the React hydration and listings to actually paint on the screen
+      await page.waitForTimeout(5000);
 
       if (await isBlocked(page)) {
         const blockedUrl = page.url();

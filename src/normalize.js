@@ -14,7 +14,6 @@
  * }
  */
 
-/** Coerce a messy price string/number into a plain number (or null). */
 export function parsePrice(raw) {
   if (raw == null) return null;
   if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
@@ -22,6 +21,14 @@ export function parsePrice(raw) {
   if (!digits) return null;
   const n = parseFloat(digits);
   return Number.isFinite(n) ? n : null;
+}
+
+/** Extract the currency symbol from a messy price string. */
+export function parseCurrency(raw) {
+  if (!raw) return "$";
+  const str = String(raw);
+  const match = str.match(/[^0-9.,\s]+/);
+  return match ? match[0].trim() : "$";
 }
 
 /** Coerce any date-ish value to an ISO 8601 string, defaulting to now. */
@@ -40,6 +47,7 @@ export function normalize({ id, title, price, location, url, image, platform, li
     id: id != null ? String(id) : null,
     title: title ? String(title).trim() : null,
     price: parsePrice(price),
+    currency: parseCurrency(price),
     location: location ? String(location).trim() : null,
     url: url || null,
     image: image || null,

@@ -73,7 +73,12 @@ const el = {
   cookieDropzone: document.getElementById("cookie-dropzone"),
   
   listingsGrid: document.getElementById("listings-grid"),
-  refreshListingsBtn: document.getElementById("refresh-listings-btn")
+  refreshListingsBtn: document.getElementById("refresh-listings-btn"),
+  filterListingsKeyword: document.getElementById("filter-listings-keyword"),
+  filterListingsLocation: document.getElementById("filter-listings-location"),
+  filterListingsPlatform: document.getElementById("filter-listings-platform"),
+  filterListingsPrice: document.getElementById("filter-listings-price"),
+  filterPriceDisplay: document.getElementById("filter-price-display")
 };
 
 // --- Authentication ---
@@ -200,9 +205,6 @@ el.addSearchBtn.onclick = () => {
   document.getElementById("new-min").value = "";
   document.getElementById("new-max").value = "";
   
-  const triggerSpan = document.querySelector("#new-country-trigger span");
-  if (triggerSpan) triggerSpan.innerHTML = "-- Select Country (Optional) --";
-  
   el.modalAddSearch.classList.remove("hidden");
 };
 el.cancelSearchBtn.onclick = () => el.modalAddSearch.classList.add("hidden");
@@ -231,35 +233,60 @@ el.saveSearchBtn.onclick = async () => {
   document.getElementById("new-min").value = "";
   document.getElementById("new-max").value = "";
   
-  const triggerSpan = document.querySelector("#new-country-trigger span");
-  if (triggerSpan) triggerSpan.innerHTML = "-- Select Country (Optional) --";
-  
   loadSearches();
 };
 
-// --- Listings ---
+let allListings = [];
+
 async function loadListings() {
   try {
-    const listings = await API.getListings();
-    if (listings.length === 0) {
-      el.listingsGrid.innerHTML = '<p style="color:var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 40px;">No recent listings found. Ensure your scrapers are running.</p>';
-      return;
-    }
-    el.listingsGrid.innerHTML = listings.map(l => `
+    allListings = await API.getListings();
+    renderListings();
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+function renderListings() {
+  const keywordFilter = el.filterListingsKeyword?.value.toLowerCase() || "";
+  const locationFilter = el.filterListingsLocation?.value.toLowerCase() || "";
+  const platformFilter = el.filterListingsPlatform?.value || "";
+  const maxPriceFilter = parseInt(el.filterListingsPrice?.value) || 10000;
+
+  if (el.filterPriceDisplay) {
+    el.filterPriceDisplay.textContent = maxPriceFilter >= 10000 ? "Any" : maxPriceFilter;
+  }
+
+  const filtered = allListings.filter(l => {
+    if (platformFilter && l.platform !== platformFilter) return false;
+    if (keywordFilter && (!l.title || !l.title.toLowerCase().includes(keywordFilter))) return false;
+    if (locationFilter && (!l.location || !l.location.toLowerCase().includes(locationFilter))) return false;
+    if (maxPriceFilter < 10000 && l.price != null && l.price > maxPriceFilter) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    el.listingsGrid.innerHTML = '<p style="color:var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 40px;">No recent listings found matching criteria.</p>';
+    return;
+  }
+  
+  el.listingsGrid.innerHTML = filtered.map(l => `
       <div class="glass-panel listing-card">
         <div class="img-wrapper" style="background-image: url('${l.image || ''}');"></div>
         <div class="details">
           <span class="platform-badge platform-${l.platform}">${l.platform}</span>
           <h4><a href="${l.url}" target="_blank" style="color: white; text-decoration: none;">${l.title}</a></h4>
-          <p class="price" style="color: #86efac; font-weight: bold; font-size: 1.2rem; margin: 8px 0;">$${l.price != null ? l.price : '?'}</p>
+          <p class="price" style="color: #86efac; font-weight: bold; font-size: 1.2rem; margin: 8px 0;">${l.currency || '$'}${l.price != null ? l.price : '?'}</p>
           <p style="color: var(--text-secondary); font-size: 0.8rem;">${l.location || 'Unknown Location'} • ${new Date(l.listed_at).toLocaleString()}</p>
         </div>
       </div>
-    `).join("");
-  } catch(err) {
-    console.error(err);
-  }
+  `).join("");
 }
+
+if (el.filterListingsKeyword) el.filterListingsKeyword.addEventListener("input", renderListings);
+if (el.filterListingsLocation) el.filterListingsLocation.addEventListener("input", renderListings);
+if (el.filterListingsPlatform) el.filterListingsPlatform.addEventListener("change", renderListings);
+if (el.filterListingsPrice) el.filterListingsPrice.addEventListener("input", renderListings);
 
 el.refreshListingsBtn.onclick = async () => {
   el.refreshListingsBtn.textContent = "Refreshing...";
@@ -451,62 +478,7 @@ async function loadCountriesDropdown() {
       });
     }
 
-    // 4. Populate and wire up Add Search Monitor country select dropdown
-    const searchOptionsContainer = document.getElementById("new-country-options");
-    const searchSelectTrigger = document.getElementById("new-country-trigger");
-    const searchHiddenInput = document.getElementById("new-location");
-    
-    if (searchOptionsContainer && searchSelectTrigger && searchHiddenInput) {
-      searchOptionsContainer.innerHTML = `
-        <div class="custom-option" data-value="" data-text="-- Select Country (Optional) --">
-          -- Select Country (Optional) --
-        </div>
-        ${Object.entries(countryFlagsData).map(([code, data]) => `
-          <div class="custom-option" data-value="${code}" data-text="${data.name}">
-            <span class="fi fi-${code.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block;"></span>
-            <span>${data.name}</span>
-          </div>
-        `).join("")}
-      `;
-      
-      // Toggle display
-      searchSelectTrigger.onclick = (e) => {
-        e.stopPropagation();
-        // Close others
-        const proxyOpts = document.getElementById("proxy-country-options");
-        if (proxyOpts) proxyOpts.classList.add("hidden");
-        const filterOpts = document.getElementById("filter-proxy-country-options");
-        if (filterOpts) filterOpts.classList.add("hidden");
-        document.querySelectorAll(".row-select-options").forEach(opt => opt.classList.add("hidden"));
-        
-        searchOptionsContainer.classList.toggle("hidden");
-      };
-      
-      // Select option
-      searchOptionsContainer.querySelectorAll(".custom-option").forEach(opt => {
-        opt.onclick = (e) => {
-          e.stopPropagation();
-          const val = opt.getAttribute("data-value");
-          const name = opt.getAttribute("data-text");
-          searchHiddenInput.value = val;
-          
-          if (val) {
-            searchSelectTrigger.querySelector("span").innerHTML = `
-              <span class="fi fi-${val.toLowerCase()}" style="border-radius: 2px; width: 20px; height: 15px; display: inline-block; vertical-align: middle; margin-right: 8px;"></span>
-              <span style="vertical-align: middle;">${name}</span>
-            `;
-          } else {
-            searchSelectTrigger.querySelector("span").innerHTML = name;
-          }
-          searchOptionsContainer.classList.add("hidden");
-        };
-      });
-      
-      // Close dropdown when clicking outside
-      document.addEventListener("click", () => {
-        searchOptionsContainer.classList.add("hidden");
-      });
-    }
+
   } catch (err) {
     console.error("Failed to load country list:", err);
   }
