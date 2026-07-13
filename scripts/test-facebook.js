@@ -4,6 +4,7 @@ import { scrapeFacebook } from "../src/scrapers/facebook.js";
 console.log("🚀 Starting Facebook Marketplace Test...\n");
 
 const search = {
+  id: 9999,
   keyword: process.argv[2] || "iphone",     // Change this to test different keywords
   location: process.argv[3] || "toronto",   // e.g. "newyork", "london", etc.
   minPrice: parseInt(process.argv[4]) || 0,

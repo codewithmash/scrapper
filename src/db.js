@@ -176,7 +176,11 @@ export function filterAndRecordNew(listings) {
 export function getRecent({ sinceMs = 10 * 60 * 1000, limit = 500 } = {}) {
   const since = new Date(Date.now() - sinceMs).toISOString();
   const rows = recentStmt.all({ since, limit });
-  return rows.map((r) => JSON.parse(r.payload));
+  return rows.map((r) => {
+    const item = JSON.parse(r.payload);
+    item.first_seen = r.first_seen;
+    return item;
+  });
 }
 
 export function getSearches() {

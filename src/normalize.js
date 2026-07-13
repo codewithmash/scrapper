@@ -31,11 +31,11 @@ export function parseCurrency(raw) {
   return match ? match[0].trim() : "$";
 }
 
-/** Coerce any date-ish value to an ISO 8601 string, defaulting to now. */
+/** Coerce any date-ish value to an ISO 8601 string, defaulting to null if not provided. */
 export function toIso(value) {
-  if (!value) return new Date().toISOString();
+  if (!value) return null;
   const d = new Date(value);
-  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
 /**

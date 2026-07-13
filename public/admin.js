@@ -293,21 +293,25 @@ function renderListings() {
     return;
   }
   
-  el.listingsGrid.innerHTML = filtered.map(l => `
+  el.listingsGrid.innerHTML = filtered.map(l => {
+    const dateText = l.listed_at 
+      ? new Date(l.listed_at).toLocaleString() 
+      : `Detected: ${l.first_seen ? new Date(l.first_seen).toLocaleString() : 'Recently'}`;
+    return `
       <div class="glass-panel listing-card" data-id="${l.id}" style="cursor: pointer;">
         <div class="img-wrapper" style="background-image: url('${l.image || ''}');"></div>
         <div class="details">
           <span class="platform-badge platform-${l.platform}">${l.platform}</span>
           <h4><a href="${l.url}" target="_blank" onclick="event.stopPropagation();" style="color: white; text-decoration: none;">${l.title}</a></h4>
           <p class="price" style="color: #86efac; font-weight: bold; font-size: 1.2rem; margin: 8px 0;">${l.currency || '$'}${l.price != null ? l.price : '?'}</p>
-          <p style="color: var(--text-secondary); font-size: 0.8rem;">${l.location || 'Unknown Location'} • ${new Date(l.listed_at).toLocaleString()}</p>
+          <p style="color: var(--text-secondary); font-size: 0.8rem;">${l.location || 'Unknown Location'} • ${dateText}</p>
         </div>
       </div>
-  `).join("");
+    `;
+  }).join("");
 
   // Attach click handlers for opening details modal
-  el.listingsGrid.querySelectorAll('.listing-card').forEach(card => {
-    card.addEventListener('click', () => {
+  el.listingsGrid.querySelectorAll('.listing-card').forEach(card => { card.addEventListener('click', () => {
       const id = card.getAttribute('data-id');
       const listing = allListings.find(l => String(l.id) === String(id));
       if (listing) openDetailsModal(listing);
@@ -320,8 +324,8 @@ function openDetailsModal(listing) {
   el.detailsPrice.textContent = `${listing.currency || '$'}${listing.price != null ? listing.price : '?'}`;
   el.detailsLocation.textContent = listing.location || 'Unknown Location';
   el.detailsPlatform.textContent = listing.platform;
-  el.detailsListed.textContent = listing.listed_at ? new Date(listing.listed_at).toLocaleString() : 'Unknown';
-  el.detailsSeen.textContent = "Recently";
+  el.detailsListed.textContent = listing.listed_at ? new Date(listing.listed_at).toLocaleString() : 'Not Available (Facebook Hidden)';
+  el.detailsSeen.textContent = listing.first_seen ? new Date(listing.first_seen).toLocaleString() : 'Recently';
   el.detailsLink.href = listing.url || '#';
   
   // Build image carousel

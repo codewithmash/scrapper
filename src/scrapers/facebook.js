@@ -62,7 +62,7 @@ function collectListings(node, out, depth = 0) {
 }
 
 function mapNode(n, search) {
-  const price = n.formatted_price?.text ?? n.listing_price?.amount ?? null;
+  const price = n.listing_price?.formatted_amount ?? n.formatted_price?.text ?? n.listing_price?.amount ?? null;
   const primaryImage = n.primary_listing_photo?.image?.uri || n.listing_photos?.[0]?.image?.uri || null;
   const city = n.location?.reverse_geocode?.city_page?.display_name || n.location_text?.text || null;
 
@@ -238,6 +238,55 @@ export async function scrapeFacebook(search) {
       const listings = captured.map(n => mapNode(n, search));
       const seen = new Set();
       const unique = listings.filter(l => !seen.has(l.id) && seen.add(l.id));
+
+      // Fetch creation_time for new listings only
+      const checkStmt = db.prepare("SELECT 1 FROM seen_listings WHERE platform = 'facebook' AND listing_id = ?");
+      for (const item of unique) {
+        if (!item.id || !item.url) continue;
+        const exists = checkStmt.get(String(item.id));
+        if (!exists) {
+          console.log(`[facebook] Fetching creation_time for new listing ${item.id}...`);
+          try {
+            const detailPage = await context.newPage();
+            // Block stylesheets, images, media and fonts to load page extremely fast
+            await detailPage.route('**/*', (route) => {
+              const type = route.request().resourceType();
+              if (['image', 'media', 'font', 'stylesheet'].includes(type)) {
+                route.abort();
+              } else {
+                route.continue();
+              }
+            });
+            await detailPage.goto(item.url, { waitUntil: "domcontentloaded", timeout: 15000 });
+            const html = await detailPage.content();
+            await detailPage.close().catch(() => {});
+            
+            // Extract creation_time robustly using ID proximity
+            const idStr = String(item.id);
+            let pos = html.indexOf(idStr);
+            let extractedTs = null;
+            while (pos !== -1) {
+              const sub = html.substring(pos, pos + 5000);
+              const match = sub.match(/"creation_time":\s*(\d+)/);
+              if (match) {
+                const ts = parseInt(match[1], 10);
+                if (ts > 1500000000 && ts < 2000000000) {
+                  extractedTs = ts;
+                  break;
+                }
+              }
+              pos = html.indexOf(idStr, pos + 1);
+            }
+            
+            if (extractedTs) {
+              item.listed_at = new Date(extractedTs * 1000).toISOString();
+              console.log(`[facebook] Set listed_at for ${item.id} to ${item.listed_at}`);
+            }
+          } catch (e) {
+            console.warn(`[facebook] Failed to fetch details for ${item.id}:`, e.message);
+          }
+        }
+      }
 
       if (unique.length === 0) {
         console.warn(`[facebook] Found 0 listings, taking debug screenshot`);

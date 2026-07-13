@@ -1,0 +1,1274 @@
+[
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1349027693960596",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/739699225_1575646464173371_8531312466780902790_n.jpg?stp=c43.0.260.260a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=B-WrQ1gHU0IQ7kNvwH12Ed-&_nc_oc=AdrcrFKZaJlUad7bXTnAc-2NZ99wkNEIdeYiPG7P8To7rIGPqVzLWrJppOWRnZLQzqU&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQBsKj3bQV2_y9LgHmBF3EhOPI5WF7_vY8z6iEeNCRoWYQ&oe=6A5AAC9E"
+      },
+      "id": "1575646457506705"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹11,000",
+      "amount_with_offset_in_currency": "11481",
+      "amount": "11000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "I phone 11",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Vasid Khan",
+      "id": "100018788770208"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "2204053857058716",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/737550945_3536894916485219_6752995263650716426_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=105&ccb=1-7&_nc_sid=92e707&_nc_ohc=sA_GWM9GYCAQ7kNvwGjTjKX&_nc_oc=AdrBFhgH0XPBghtcm_gIFaZ--P6bQYgdttuX6qugj0CabothW-s_FDR95IOqv2lxRGk&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQDc8c2KivXNy0JmXGfCNnzV2Rx85diidUFt3LU9go-7vA&oe=6A5AA214"
+      },
+      "id": "3536894903151887"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹54,999",
+      "amount_with_offset_in_currency": "57405",
+      "amount": "54999.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "[hidden information]",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Šhűbhãm Jøšhì",
+      "id": "100008173932382"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "2061400151449540",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/737412801_1688656892372646_2166323675043004071_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=nZNpN4JVuRsQ7kNvwHBy_jd&_nc_oc=AdqKHUaxRfOhORvJ9dp8us9YK-xUVg8UAWeA6eZpbjv4KrJkaelKKGxO6q_gfno6YqQ&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQD7CPK0duyMNqJfIh-dvPlV1eCS24473-f5MnQk4wet-g&oe=6A5AA8CF"
+      },
+      "id": "1688656879039314"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹11,000",
+      "amount_with_offset_in_currency": "11481",
+      "amount": "11000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "I phone 11 64gb Battery change original Baki full original phone h bil box complete \n Phone no. 9630",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Saqib Ahmad",
+      "id": "100018826751488"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1792955791669650",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/738206635_1528598885433942_8775775823029998670_n.jpg?stp=c43.0.260.260a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=0J3-CKxyboAQ7kNvwGKijpY&_nc_oc=Adrx9Fw1rwcf2-jNhcVXq6r7OjxRTU5snfIuv_BDo_9chgbwcbVN21WIwkznl5PjJow&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQD2zvlCKMtxhzIHphAeuEUy9F6V1qkqW9QDex1CAqpJVw&oe=6A5A981F"
+      },
+      "id": "1528598868767277"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹16,500",
+      "amount_with_offset_in_currency": "17222",
+      "amount": "16500.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "I phone 12 mini 64",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Lalit Kushwaha",
+      "id": "100025496293527"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "995672856408863",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/736524892_962353030092833_1273076052755799191_n.jpg?stp=c43.0.260.260a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=OnUOAS8Z5_8Q7kNvwFiW_Fh&_nc_oc=AdqNWBXELPguy9irzUvRp7Kq77FzDn83tLngf_o-Z0ATd_mzxUcO655NklOx5s3y_5U&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQDVJbDFTARLcOVq9F03eHlaOd0htuYNXVOMJzDJe2L3sQ&oe=6A5A9BFE"
+      },
+      "id": "962353023426167"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹16,500",
+      "amount_with_offset_in_currency": "17222",
+      "amount": "16500.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "Top condition",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Lalit Kushwaha",
+      "id": "100025496293527"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1048745547610536",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/736225297_854062224149378_1220498288736255570_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=107&ccb=1-7&_nc_sid=92e707&_nc_ohc=KUkHYN10M0YQ7kNvwHOR-Wh&_nc_oc=AdpuXMNcf-9hoWkVWXE0pPCAI_RS-sPTljW0662CRuY_S1vo5LrB2PhzDhDjTT1jalE&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQAV1JGfB47FgpqFSzzsapDSUYiuDouqgqKLd68a0MYpyQ&oe=6A5AB834"
+      },
+      "id": "854062200816047"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹13,000",
+      "amount_with_offset_in_currency": "13569",
+      "amount": "13000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "iPhone 11",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Fåišaľ Ãlî Khåñ",
+      "id": "100002921102146"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1321346990197908",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/735564250_1320114860291967_6415443457624236932_n.jpg?stp=c0.8.261.261a_dst-jpg_p261x260_tt6&_nc_cat=111&ccb=1-7&_nc_sid=92e707&_nc_ohc=sA8hXhnoEqEQ7kNvwFEMa5D&_nc_oc=AdpvGdMeVnweURAr3sXv5JeT3iEF9SeYhiPJMAEg9tmLVAPDalp3vzPqcUZD9NmcQlM&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQBGhQ-JXKsMWj0UNktDrFhGyuWqKUYCmiEXLYnMf9mcZA&oe=6A5AA7DA"
+      },
+      "id": "1320114850291968"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹7,500",
+      "amount_with_offset_in_currency": "7828",
+      "amount": "7500.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "IPhone 13 5G 128 GB",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Abhishek Rajput",
+      "id": "61590955101773"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "2469771486818953",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/735457416_1378665197449859_6096042679145755986_n.jpg?stp=c0.0.261.261a_dst-jpg_p261x260_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=d022_2t7rz8Q7kNvwG5chDK&_nc_oc=AdpD05O0K0d4wXr4YSEAMywdx8sB-U7TCaOuq5shGXdWhP-Gx1hXyCN2q38UmRRkx3E&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQCVnOvgX42WgCwBbB8GgNpT-ndmj3tP_BnGrnCMeTdsiw&oe=6A5AA164"
+      },
+      "id": "1378665184116527"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹20,000",
+      "amount_with_offset_in_currency": "20875",
+      "amount": "20000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "iPhone 15 256gb for sale urgent",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "दिलचन कुमार दिलचन कुमार",
+      "id": "100078425413336"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1565772061886820",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/734472264_1705781867285968_669028317268093092_n.jpg?stp=c0.0.261.261a_dst-jpg_p261x260_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=Cm8bPTpZBDAQ7kNvwEbSVeV&_nc_oc=Adq1zgXgHkEr5w5VsxNYxQ7zzPb2we1NVIZfsBMr2tQGDHbpWYRdWcgc-W99BOLVTbk&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQAtljnQVD4Qp6GJ0XUV2abrkv7oapsAgMnhMYwnCnpONw&oe=6A5AC188"
+      },
+      "id": "1705781847285970"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹25,000",
+      "amount_with_offset_in_currency": "26094",
+      "amount": "25000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "Iphone 13 pro max used one emi cod all accessorie available under warranty",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Ashika Bhatiya",
+      "id": "61584468026784"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1512734076519482",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/734768206_1518130349434050_1749783916205631600_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=SN0LRxNYy3wQ7kNvwEEmBPd&_nc_oc=Adp8OusqxHHIwEmbg6zJe-juT7-kau0DZP2eRBqL0fcgUn07fdU8-zXjy5H_wHFaNpU&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQCFOLya_KLXyARysaQpIls1rBvoLw7zokMkL-FPVSsRCA&oe=6A5A9002"
+      },
+      "id": "1518130322767386"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹25,000",
+      "amount_with_offset_in_currency": "26094",
+      "amount": "25000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "Iphone 14pro max used phone emi cod bill box charger all accessorie available",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Ashika Bhatiya",
+      "id": "61584468026784"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1358193562914847",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/734461676_1555345642977529_6014900478679359157_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=111&ccb=1-7&_nc_sid=92e707&_nc_ohc=qElzYQfQJXsQ7kNvwEBEtGP&_nc_oc=Adoc-6cbsHr3ACdQIxVwD-zzk_sOArY_GQ_-evvj3eMzlSunYHa-CA7bbIob52cNlAY&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQDjUyWCuvo9oETKUYX7JWAKWuFD7KTZiV8zkr9DV3Sptg&oe=6A5AC1F6"
+      },
+      "id": "1555345629644197"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹85,000",
+      "amount_with_offset_in_currency": "88719",
+      "amount": "85000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "Iphone 16 pro 256gb",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Creater Bro",
+      "id": "100008234025226"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1328630968852401",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/735415717_991051036889597_2808027563563429956_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=ln8NpOBLi48Q7kNvwEr7OJ9&_nc_oc=AdrFZB5ehxZRYsuUL6ZrLWmR_-gijaHwQESw9rmIz4u8yXeTYmmmCuDTgjNovkZpQwg&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQBQVF07aa7vyzDHb7X6DdXjtW1adydyBAqdzuw_H1gV9A&oe=6A5AC2C6"
+      },
+      "id": "991051026889598"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹21,500",
+      "amount_with_offset_in_currency": "22441",
+      "amount": "21500.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "iPhone 12, 128GB bule color battery 76 \nAll original phone never open never repair",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Om Vishwakarma",
+      "id": "100024615812991"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1514789316234168",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/732831852_871387385851447_6973075545945436515_n.jpg?stp=c0.101.261.261a_dst-jpg_p261x260_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=8yiV-_pruwYQ7kNvwGN9HLy&_nc_oc=Adr09BQBVE5OaZ81U1zqQxpc7uc0TPpLt8G9TJUGDoqZqQW65N0IfHEn7qh4uVDs-rI&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQBK1xF2BoMEvQsHnZnpHx5l6LZt-ilQoLWmUkvducg6_g&oe=6A5A9338"
+      },
+      "id": "871387369184782"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹60,000",
+      "amount_with_offset_in_currency": "62625",
+      "amount": "60000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "Iphone 14 pro max",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Ayan Khan",
+      "id": "61590487444055"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1001242532622478",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/735563266_1228543499321942_7857596468112552761_n.jpg?stp=c43.0.260.260a_dst-jpg_p261x260_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=nuygw5B8_pEQ7kNvwGi21jd&_nc_oc=AdrWKhLI3z-KzyTwKGVtBWPlLdvHQ3TQqhQzjOpwGvqZV6cmEcHi3mmhEqpTv34GDbA&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQAXUNQcunzz2NxgjQYqmiD4XkcSrc1-U3HT1BNByE2jzA&oe=6A5AAD0A"
+      },
+      "id": "1228543475988611"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹25,000",
+      "amount_with_offset_in_currency": "26094",
+      "amount": "25000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "For+new+phone+",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Tarun S",
+      "id": "100041263432386"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1544241197164016",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/734455652_3779796288840301_4270204011560468043_n.jpg?stp=c0.62.261.261a_dst-jpg_p261x260_tt6&_nc_cat=104&ccb=1-7&_nc_sid=92e707&_nc_ohc=q8qfj58b34AQ7kNvwF57Md1&_nc_oc=AdqZm3DIzgvQwh2I5YEO-vLnSioPouQU6oxpGpzbfVR4xXSgwDnqwwMfAKYaUkc3Wtg&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQAUVwT4ojuvmeN4fogURFAGkjtodThKjRq4N-P06Mge7w&oe=6A5ABBEC"
+      },
+      "id": "3779796242173639"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹28,000",
+      "amount_with_offset_in_currency": "29225",
+      "amount": "28000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "Oneplus 11 5g 16/256gb",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Mohammad Ilyan",
+      "id": "100073635617473"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1535594904685150",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/735636710_1716367513034408_4506105031358842146_n.jpg?stp=c0.159.261.261a_dst-jpg_p261x260_tt6&_nc_cat=105&ccb=1-7&_nc_sid=92e707&_nc_ohc=C6PBCm-s-AYQ7kNvwE2uymR&_nc_oc=AdqIGeAU02twtWJaKg0hmlFJJNKtgtP8ZF5M3QZK2li-w3CbNF51YewaLQ2uhDmznMo&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQAgbE_7TgZXktBHZTjNmcgiD9LLHC0mMZC9GJnnn6Je3A&oe=6A5AA8D1"
+      },
+      "id": "1716367503034409"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹24,000",
+      "amount_with_offset_in_currency": "25050",
+      "amount": "24000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "I phone 12 pro 128",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "N. Kay",
+      "id": "100015321189031"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1325602296411662",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/732494634_3381439252058825_6054995440827265383_n.jpg?stp=c0.37.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=_46OO8nAVJYQ7kNvwEJUeCi&_nc_oc=AdrY56Z4hZLUbsD0FbCaMpPtJYSjsa8uo6NOmcvojuvqdBxvJ5Psi8SNRjYcw6PYkPc&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQBzjeuaQMhlOJjSvQAkNAnLm8wd49jiCfJu4_4QHOcM8A&oe=6A5AB101"
+      },
+      "id": "3381439242058826"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹13,000",
+      "amount_with_offset_in_currency": "13569",
+      "amount": "13000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "New mobile",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Raja Dhakse",
+      "id": "100030890255615"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "2227191911427326",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/734756211_2096882327902298_5079762336077455031_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=PbprWRk_yBcQ7kNvwE-dL9b&_nc_oc=AdrbxRxtJcIQI8D8-BdUD0FCGyJ8kmwD5eLAy5MVl2-SESi30U6rBvkXam7pNsS9dCE&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQAc-oeatxSRT5-fJ6xAknMP7QFh7Q1uPAujIUXb0M7vKg&oe=6A5A964E"
+      },
+      "id": "2096882314568966"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹50,000",
+      "amount_with_offset_in_currency": "52187",
+      "amount": "50000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "I phone 14 pro",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Mehfuz Khan",
+      "id": "100037199045835"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1673119993972157",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/734178212_1664842311460316_8447573047305003389_n.jpg?stp=c0.159.261.261a_dst-jpg_p261x260_tt6&_nc_cat=107&ccb=1-7&_nc_sid=92e707&_nc_ohc=zAPIN4vT3RQQ7kNvwGFs6V2&_nc_oc=AdpMCbwbl9Cly99nRNNTvgzp7s6Bin-aduIWLGgOD49X6rrcQwV0XlzmjD72dGADN8E&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQCsncON42R_lUl_o3wS8Q-_FfQf6SA_WxiLobtFNzUZOA&oe=6A5A9498"
+      },
+      "id": "1664842298126984"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹70,000",
+      "amount_with_offset_in_currency": "73062",
+      "amount": "70000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "Apple iPhone 15 Pro Max 256 GB",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Anas Qureshi",
+      "id": "100004069095654"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1595994005277699",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/731787293_1530500768553252_8656894925612617775_n.jpg?stp=c0.38.261.261a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=LwD5CxtSRjEQ7kNvwE6zO-g&_nc_oc=AdokqJaJwHt0401zU-D3PwHzYiR-_b-V8dJXjqHbA5p29dPD3LPRcMlGLMpxoZUSgKU&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQAvBI92MUS_JorIsXfn0tW-r9XaWPAIkJFn9zKY48wWmQ&oe=6A5A98CB"
+      },
+      "id": "1530500755219920"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹80,000",
+      "amount_with_offset_in_currency": "83500",
+      "amount": "80000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "I phone 16 pro",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Akash Dhakad",
+      "id": "61566161412594"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "1917634925615823",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp2-1.xx.fbcdn.net/v/t39.84726-6/729451821_990569720525694_4319307134054733713_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=111&ccb=1-7&_nc_sid=92e707&_nc_ohc=wcUXddz4pH8Q7kNvwHm0ZVl&_nc_oc=AdrwCPhZSdp_s3HVNjFGf8S8St9O_0vV5nzi81G7RY04wTgy5Ec7O_k_ljCjIJEzMso&_nc_zt=14&_nc_ht=scontent-mxp2-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQCmUPxgLzq5O6Raq1ObJh9jgOBo7YWnep4QzkrfTHGTgQ&oe=6A5ABE93"
+      },
+      "id": "990569703859029"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹700",
+      "amount_with_offset_in_currency": "731",
+      "amount": "700.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1792291877663080",
+    "marketplace_listing_title": "Apple ka charger 20wat",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Shakir Ali",
+      "id": "100082980073405"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "880274167890414",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/729451842_1374750344498252_1592211701927208558_n.jpg?stp=c0.101.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=ZwrdJPeqI2wQ7kNvwF88a2h&_nc_oc=Adp9i5pZllYgvp5QDplmSZWAyXJIoi2x6ykXjESRaQ6iscdOZmzss4NWQgbaGW5YH1M&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQBV-zmURkMFF1AvDhRACm3_y1zL8x3cm8D8tw46pBgILg&oe=6A5A92FC"
+      },
+      "id": "1374750337831586"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹25,499",
+      "amount_with_offset_in_currency": "26615",
+      "amount": "25499.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "iPhone 12....5g…(Fixed-Rate)",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Ash Herbert",
+      "id": "100014795529275"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "2070492193841001",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/732253066_2074363463115243_7578680335826976690_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=106&ccb=1-7&_nc_sid=92e707&_nc_ohc=_HyVB9usz3sQ7kNvwFhLgqg&_nc_oc=AdpQgBZLax0bnfKGz53IH1soxgGqCiU5Bj7-e7g7Rvdbq8mrPHgttPzgNxmsWDXcwwg&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQC-SibAwkKduwzAyEY6SN2Rlr8CeZ-75Eaejl6v0t2Ibw&oe=6A5AAABD"
+      },
+      "id": "2074363449781911"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹24,000",
+      "amount_with_offset_in_currency": "25050",
+      "amount": "24000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "iPhone 13 128/GB newar",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Thamir Khan",
+      "id": "100048878496651"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  },
+  {
+    "__typename": "GroupCommerceProductItem",
+    "id": "4411318929108142",
+    "primary_listing_photo": {
+      "__typename": "CatalogMarketplaceEnhancementTransformedImage",
+      "image": {
+        "uri": "https://scontent-mxp1-1.xx.fbcdn.net/v/t39.84726-6/729579111_1679224519994701_3026743306352217051_n.jpg?stp=c0.159.261.261a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=QE8BZODBt4EQ7kNvwFPryt7&_nc_oc=AdpcYsQEePE5rc62Yrg-P4bvgn-aRdspz7c-gxX9d7n8XFZ4zd_S4pmih9N8_BwOGY0&_nc_zt=14&_nc_ht=scontent-mxp1-1.xx&_nc_gid=v8C5A9ydeXxeNX4KDgTzhQ&_nc_ss=7b2a8&oh=00_AQClcuUJBnCOf3aLhsqe_9VBO2OGasRZOvDZAlqD06lruw&oe=6A5A9069"
+      },
+      "id": "1679224499994703"
+    },
+    "if_gk_just_listed_tag_on_search_feed": null,
+    "__isMarketplaceListingRenderable": "GroupCommerceProductItem",
+    "listing_price": {
+      "formatted_amount": "₹30,000",
+      "amount_with_offset_in_currency": "31312",
+      "amount": "30000.00"
+    },
+    "strikethrough_price": null,
+    "location": {
+      "reverse_geocode": {
+        "city": "Bhopal",
+        "state": "MP",
+        "city_page": {
+          "display_name": "Bhopal, Madhya Pradesh",
+          "id": "115837015097302"
+        }
+      }
+    },
+    "is_hidden": false,
+    "is_live": true,
+    "is_pending": false,
+    "is_sold": false,
+    "is_viewer_seller": false,
+    "min_listing_price": null,
+    "max_listing_price": null,
+    "marketplace_listing_category_id": "1557869527812749",
+    "marketplace_listing_title": "I phone 13 black colour urgently sale",
+    "custom_title": null,
+    "custom_sub_titles_with_rendering_flags": [],
+    "origin_group": null,
+    "listing_video": null,
+    "__isMarketplaceListingWithChildListings": "GroupCommerceProductItem",
+    "parent_listing": null,
+    "marketplace_listing_seller": {
+      "__typename": "User",
+      "name": "Avi Nash",
+      "id": "100093863217136"
+    },
+    "__isMarketplaceListingWithDeliveryOptions": "GroupCommerceProductItem",
+    "delivery_types": [
+      "IN_PERSON"
+    ]
+  }
+]
