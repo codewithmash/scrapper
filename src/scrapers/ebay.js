@@ -57,16 +57,30 @@ export async function scrapeEbay(search) {
   const feed = await parser.parseString(stdout);
 
   const listings = (feed.items || []).map((item) => {
+    // Extract multiple images from the media:content tags if available
+    const images = [];
+    const enclosureImage = item.enclosure?.url || null;
+    if (enclosureImage) images.push(enclosureImage);
+    
+    if (Array.isArray(item.media)) {
+      for (const m of item.media) {
+        const url = m?.$?.url;
+        if (url && !images.includes(url)) images.push(url);
+      }
+    }
+
     // eBay item GUID/link contains the numeric item id: .../itm/1234567890
     const idMatch = /\/(\d{9,})(?:[?#]|$)/.exec(item.link || item.guid || "");
     const id = idMatch ? idMatch[1] : item.guid || item.link;
+
     return normalize({
       id,
       title: item.title,
       price: extractPrice(item),
       location: search.location || null, // eBay RSS rarely gives item location
       url: item.link,
-      image: extractImage(item),
+      image: images[0] || extractImage(item),
+      images: images.length > 0 ? images : null,
       platform: "ebay",
       listed_at: item.isoDate || item.pubDate,
     });

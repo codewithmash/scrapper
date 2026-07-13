@@ -44,18 +44,36 @@ export async function scrapeOfferUp(search) {
       const rawListings = [];
       collectListingTiles(nextData, rawListings);
 
-      const listings = rawListings.map((l) =>
-        normalize({
+      const listings = rawListings.map((l) => {
+        const primaryImage = l.image?.url ?? null;
+        const images = [];
+        if (primaryImage) images.push(primaryImage);
+        if (Array.isArray(l.photos)) {
+          for (const photo of l.photos) {
+            if (photo?.url && !images.includes(photo.url)) {
+              images.push(photo.url);
+            }
+          }
+        } else if (Array.isArray(l.images)) {
+          for (const img of l.images) {
+            if (img?.url && !images.includes(img.url)) {
+              images.push(img.url);
+            }
+          }
+        }
+
+        return normalize({
           id: l.listingId,
           title: l.title,
           price: l.price != null ? parseFloat(String(l.price).replace(/[^0-9.]/g, "")) : null,
           location: l.locationName ?? search.location ?? null,
           url: l.listingId ? `https://offerup.com/item/detail/${l.listingId}` : null,
-          image: l.image?.url ?? null,
+          image: primaryImage,
+          images: images,
           platform: "offerup",
           listed_at: null,
-        })
-      );
+        });
+      });
 
       await browser.close();
 

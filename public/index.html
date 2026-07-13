@@ -77,6 +77,14 @@
               </label>
               <input type="range" id="filter-listings-price" min="0" max="10000" step="10" value="10000" style="width: 100%; cursor: pointer;" />
             </div>
+            <div class="form-group" style="margin: 0; flex: 1; min-width: 150px;">
+              <label for="sort-listings" style="font-size: 0.8rem; margin-bottom: 4px;">Sort By</label>
+              <select id="sort-listings">
+                <option value="latest">Latest</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+              </select>
+            </div>
           </div>
         </header>
         <div id="listings-grid" class="listings-grid">
@@ -355,6 +363,30 @@
       <div class="modal-actions">
         <button id="cancel-proxy-btn" class="secondary-btn">Cancel</button>
         <button id="add-proxy-btn" class="primary-btn">Add Proxy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div id="modal-details" class="modal hidden">
+    <div class="glass-panel modal-content" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <h2 id="details-title" style="margin-bottom: 15px; font-size: 1.5rem;">Listing Details</h2>
+      
+      <div id="details-image-carousel" style="display: flex; overflow-x: auto; gap: 10px; margin-bottom: 20px; padding-bottom: 10px; scroll-snap-type: x mandatory;">
+        <!-- JS injected images -->
+      </div>
+      
+      <div class="details-info" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+        <div><strong style="color: var(--accent-color);">Price:</strong> <span id="details-price"></span></div>
+        <div><strong>Location:</strong> <span id="details-location"></span></div>
+        <div><strong>Platform:</strong> <span id="details-platform"></span></div>
+        <div><strong>Listed:</strong> <span id="details-listed"></span></div>
+        <div><strong>Seen By Scraper:</strong> <span id="details-seen"></span></div>
+      </div>
+      
+      <div class="modal-actions" style="justify-content: space-between;">
+        <a id="details-link" href="#" target="_blank" class="primary-btn" style="text-decoration: none; text-align: center;">View on Original Site</a>
+        <button id="close-details-btn" class="secondary-btn">Close</button>
       </div>
     </div>
   </div>

@@ -63,8 +63,19 @@ function collectListings(node, out, depth = 0) {
 
 function mapNode(n, search) {
   const price = n.formatted_price?.text ?? n.listing_price?.amount ?? null;
-  const image = n.primary_listing_photo?.image?.uri || n.listing_photos?.[0]?.image?.uri || null;
+  const primaryImage = n.primary_listing_photo?.image?.uri || n.listing_photos?.[0]?.image?.uri || null;
   const city = n.location?.reverse_geocode?.city_page?.display_name || n.location_text?.text || null;
+
+  // Extract all available images
+  const images = [];
+  if (primaryImage) images.push(primaryImage);
+  if (Array.isArray(n.listing_photos)) {
+    for (const photo of n.listing_photos) {
+      if (photo?.image?.uri && !images.includes(photo.image.uri)) {
+        images.push(photo.image.uri);
+      }
+    }
+  }
 
   return normalize({
     id: n.id || n.legacy_id,
@@ -72,7 +83,8 @@ function mapNode(n, search) {
     price,
     location: city || search.location,
     url: n.id ? `https://www.facebook.com/marketplace/item/${n.id}` : null,
-    image,
+    image: primaryImage,
+    images: images,
     platform: "facebook",
     listed_at: n.creation_time ? new Date(n.creation_time * 1000).toISOString() : null,
   });
