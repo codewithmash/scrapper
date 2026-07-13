@@ -42,7 +42,15 @@ export function toIso(value) {
  * Build a normalized listing. Missing optional fields become null so the
  * output shape is always stable.
  */
-export function normalize({ id, title, price, location, url, image, platform, listed_at }) {
+export function normalize({ id, title, price, location, url, image, images, platform, listed_at }) {
+  // If images array is provided use it, otherwise fallback to single image, otherwise empty array
+  let finalImages = [];
+  if (Array.isArray(images) && images.length > 0) {
+    finalImages = images.filter(Boolean);
+  } else if (image) {
+    finalImages = [image];
+  }
+
   return {
     id: id != null ? String(id) : null,
     title: title ? String(title).trim() : null,
@@ -50,7 +58,8 @@ export function normalize({ id, title, price, location, url, image, platform, li
     currency: parseCurrency(price),
     location: location ? String(location).trim() : null,
     url: url || null,
-    image: image || null,
+    image: finalImages[0] || null, // Primary thumbnail
+    images: finalImages, // All available images
     platform,
     listed_at: toIso(listed_at),
   };

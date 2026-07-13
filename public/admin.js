@@ -79,7 +79,19 @@ const el = {
   filterListingsLocation: document.getElementById("filter-listings-location"),
   filterListingsPlatform: document.getElementById("filter-listings-platform"),
   filterListingsPrice: document.getElementById("filter-listings-price"),
-  filterPriceDisplay: document.getElementById("filter-price-display")
+  filterPriceDisplay: document.getElementById("filter-price-display"),
+  sortListings: document.getElementById("sort-listings"),
+  
+  modalDetails: document.getElementById("modal-details"),
+  closeDetailsBtn: document.getElementById("close-details-btn"),
+  detailsTitle: document.getElementById("details-title"),
+  detailsImageCarousel: document.getElementById("details-image-carousel"),
+  detailsPrice: document.getElementById("details-price"),
+  detailsLocation: document.getElementById("details-location"),
+  detailsPlatform: document.getElementById("details-platform"),
+  detailsListed: document.getElementById("details-listed"),
+  detailsSeen: document.getElementById("details-seen"),
+  detailsLink: document.getElementById("details-link")
 };
 
 // --- Authentication ---
@@ -258,7 +270,9 @@ function renderListings() {
     el.filterPriceDisplay.textContent = maxPriceFilter >= 10000 ? "Any" : maxPriceFilter;
   }
 
-  const filtered = allListings.filter(l => {
+  const sortOption = el.sortListings?.value || "latest";
+
+  let filtered = allListings.filter(l => {
     if (platformFilter && l.platform !== platformFilter) return false;
     if (keywordFilter && (!l.title || !l.title.toLowerCase().includes(keywordFilter))) return false;
     if (locationFilter && (!l.location || !l.location.toLowerCase().includes(locationFilter))) return false;
@@ -266,28 +280,72 @@ function renderListings() {
     return true;
   });
 
+  if (sortOption === "price_asc") {
+    filtered.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+  } else if (sortOption === "price_desc") {
+    filtered.sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
+  } else {
+    // "latest" relies on natural DB order (listed_at desc) which we receive from API
+  }
+
   if (filtered.length === 0) {
     el.listingsGrid.innerHTML = '<p style="color:var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 40px;">No recent listings found matching criteria.</p>';
     return;
   }
   
   el.listingsGrid.innerHTML = filtered.map(l => `
-      <div class="glass-panel listing-card">
+      <div class="glass-panel listing-card" data-id="${l.id}" style="cursor: pointer;">
         <div class="img-wrapper" style="background-image: url('${l.image || ''}');"></div>
         <div class="details">
           <span class="platform-badge platform-${l.platform}">${l.platform}</span>
-          <h4><a href="${l.url}" target="_blank" style="color: white; text-decoration: none;">${l.title}</a></h4>
+          <h4><a href="${l.url}" target="_blank" onclick="event.stopPropagation();" style="color: white; text-decoration: none;">${l.title}</a></h4>
           <p class="price" style="color: #86efac; font-weight: bold; font-size: 1.2rem; margin: 8px 0;">${l.currency || '$'}${l.price != null ? l.price : '?'}</p>
           <p style="color: var(--text-secondary); font-size: 0.8rem;">${l.location || 'Unknown Location'} • ${new Date(l.listed_at).toLocaleString()}</p>
         </div>
       </div>
   `).join("");
+
+  // Attach click handlers for opening details modal
+  el.listingsGrid.querySelectorAll('.listing-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.getAttribute('data-id');
+      const listing = allListings.find(l => String(l.id) === String(id));
+      if (listing) openDetailsModal(listing);
+    });
+  });
+}
+
+function openDetailsModal(listing) {
+  el.detailsTitle.textContent = listing.title || 'Unknown Title';
+  el.detailsPrice.textContent = `${listing.currency || '$'}${listing.price != null ? listing.price : '?'}`;
+  el.detailsLocation.textContent = listing.location || 'Unknown Location';
+  el.detailsPlatform.textContent = listing.platform;
+  el.detailsListed.textContent = listing.listed_at ? new Date(listing.listed_at).toLocaleString() : 'Unknown';
+  el.detailsSeen.textContent = "Recently";
+  el.detailsLink.href = listing.url || '#';
+  
+  // Build image carousel
+  let imagesHtml = '';
+  const images = Array.isArray(listing.images) && listing.images.length > 0 ? listing.images : (listing.image ? [listing.image] : []);
+  if (images.length > 0) {
+    imagesHtml = images.map(img => `<img src="${img}" style="height: 300px; border-radius: 8px; object-fit: contain; background: rgba(0,0,0,0.5); scroll-snap-align: start;" />`).join("");
+  } else {
+    imagesHtml = '<div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border-radius: 8px; color: var(--text-secondary);">No images available</div>';
+  }
+  el.detailsImageCarousel.innerHTML = imagesHtml;
+  
+  el.modalDetails.classList.remove('hidden');
+}
+
+if (el.closeDetailsBtn) {
+  el.closeDetailsBtn.addEventListener('click', () => el.modalDetails.classList.add('hidden'));
 }
 
 if (el.filterListingsKeyword) el.filterListingsKeyword.addEventListener("input", renderListings);
 if (el.filterListingsLocation) el.filterListingsLocation.addEventListener("input", renderListings);
 if (el.filterListingsPlatform) el.filterListingsPlatform.addEventListener("change", renderListings);
 if (el.filterListingsPrice) el.filterListingsPrice.addEventListener("input", renderListings);
+if (el.sortListings) el.sortListings.addEventListener("change", renderListings);
 
 el.refreshListingsBtn.onclick = async () => {
   el.refreshListingsBtn.textContent = "Refreshing...";
