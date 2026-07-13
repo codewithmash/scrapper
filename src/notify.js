@@ -37,7 +37,7 @@ export async function pushNewListings(listings, topic = config.fcm.defaultTopic)
         topic,
         notification: {
           title: `New on ${l.platform}: ${l.title ?? "listing"}`,
-          body: [l.price != null ? `$${l.price}` : null, l.location].filter(Boolean).join(" · "),
+          body: [l.price != null ? `${l.currency || '$'}${l.price}` : null, l.location].filter(Boolean).join(" · "),
         },
         data: {
           id: String(l.id ?? ""),
@@ -56,7 +56,7 @@ export async function pushNewListings(listings, topic = config.fcm.defaultTopic)
 
     // 2. Send Telegram Message if configured
     if (botToken && chatId) {
-      const caption = `🚨 *New on ${l.platform}*\n\n*${l.title}*\n💰 Price: ${l.price != null ? `$${l.price}` : "N/A"}\n📍 Location: ${l.location || "N/A"}\n\n🔗 [View Listing](${l.url})`;
+      const caption = `🚨 *New on ${l.platform}*\n\n*${l.title}*\n💰 Price: ${l.price != null ? `${l.currency || '$'}${l.price}` : "N/A"}\n📍 Location: ${l.location || "N/A"}\n\n🔗 [View Listing](${l.url})`;
       try {
         // Try sendPhoto first if image is available
         if (l.image) {

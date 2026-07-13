@@ -94,13 +94,15 @@ export async function scrapeFacebook(search) {
   // 2. Select candidates based on assignment & load balance
   let candidates = [];
   
-  // Search for accounts assigned to this specific search
   const assigned = activeAccounts.filter(a => a.assigned_search_id === search.id);
+  
   if (assigned.length > 0) {
-    candidates = assigned;
+    // If we have assigned accounts, try them first. If they fail, fall back to explicit fallback accounts
+    const explicitFallbacks = activeAccounts.filter(a => assigned.some(assignedAcc => a.fallback_for_account_id === assignedAcc.id));
+    candidates = [...assigned, ...explicitFallbacks];
   } else {
-    // Round-robin / rotate across unassigned active accounts (sorted by last_used oldest first)
-    const unassigned = activeAccounts.filter(a => a.assigned_search_id === null);
+    // If no assigned accounts, just use the unassigned pool (not acting as fallbacks)
+    const unassigned = activeAccounts.filter(a => a.assigned_search_id === null && a.fallback_for_account_id === null);
     if (unassigned.length > 0) {
       unassigned.sort((a, b) => {
         if (!a.last_used) return -1;
@@ -109,7 +111,7 @@ export async function scrapeFacebook(search) {
       });
       candidates = unassigned;
     } else {
-      // Fallback: rotate across any active account
+      // Last resort fallback: rotate across any active account
       activeAccounts.sort((a, b) => {
         if (!a.last_used) return -1;
         if (!b.last_used) return 1;

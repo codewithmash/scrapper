@@ -19,6 +19,7 @@ const API = {
   getAccounts: () => API.req("/accounts"),
   updateAccountStatus: (id, status) => API.req("/accounts/status", { method: "POST", body: JSON.stringify({ id, status }) }),
   assignAccount: (id, searchId) => API.req("/accounts/assign", { method: "POST", body: JSON.stringify({ id, searchId }) }),
+  assignFallback: (id, fallbackId) => API.req("/accounts/fallback", { method: "POST", body: JSON.stringify({ id, fallbackId }) }),
   assignProxy: (id, proxy) => API.req("/accounts/proxy", { method: "POST", body: JSON.stringify({ id, proxy }) }),
   getMetrics: () => API.req("/metrics"),
   getLogs: () => API.req("/logs"),
@@ -857,7 +858,7 @@ async function loadAccounts() {
     }).filter(p => p.key);
     
     if (accounts.length === 0) {
-      el.accountsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 20px;">No accounts synced. Please upload a cookie file in the FB Cookies tab.</td></tr>`;
+      el.accountsTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 20px;">No accounts synced. Please upload a cookie file in the FB Cookies tab.</td></tr>`;
       return;
     }
     
@@ -882,6 +883,16 @@ async function loadAccounts() {
         </select>
       `;
  
+      // Fallback select dropdown
+      const fallbackOptions = [
+        '<option value="">-- No Fallback --</option>',
+        ...accounts.filter(acc => acc.id !== a.id).map(acc => `
+          <option value="${acc.id}" ${a.fallback_for_account_id === acc.id ? 'selected' : ''}>
+            ${acc.id}
+          </option>
+        `)
+      ].join("");
+
       return `
         <tr>
           <td><code style="color: #60a5fa">${a.id}</code></td>
@@ -889,6 +900,11 @@ async function loadAccounts() {
           <td>
             <select class="assignment-select" onchange="changeAccountAssignment('${a.id}', this.value)">
               ${options}
+            </select>
+          </td>
+          <td>
+            <select class="assignment-select" onchange="changeAccountFallback('${a.id}', this.value)" style="max-width: 150px;">
+              ${fallbackOptions}
             </select>
           </td>
           <td><strong style="color: #4ade80">${a.success_count}</strong></td>
@@ -921,6 +937,15 @@ window.changeAccountAssignment = async (id, searchId) => {
     loadAccounts();
   } catch (err) {
     alert("Failed to assign search: " + err.message);
+  }
+};
+
+window.changeAccountFallback = async (id, fallbackId) => {
+  try {
+    await API.assignFallback(id, fallbackId || null);
+    loadAccounts();
+  } catch (err) {
+    alert("Failed to assign fallback: " + err.message);
   }
 };
 

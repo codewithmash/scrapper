@@ -38,7 +38,10 @@ db.exec(`
     success_count        INTEGER DEFAULT 0,
     last_used            TEXT,
     created_at           TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(assigned_search_id) REFERENCES searches(id) ON DELETE SET NULL
+    assigned_proxy       TEXT,
+    fallback_for_account_id TEXT DEFAULT NULL,
+    FOREIGN KEY(assigned_search_id) REFERENCES searches(id) ON DELETE SET NULL,
+    FOREIGN KEY(fallback_for_account_id) REFERENCES facebook_accounts(id) ON DELETE SET NULL
   );
 
   CREATE TABLE IF NOT EXISTS health_logs (
@@ -63,10 +66,12 @@ db.exec(`
 
 // Migration: add assigned_proxy column to facebook_accounts if not exists
 try {
-  db.exec("ALTER TABLE facebook_accounts ADD COLUMN assigned_proxy TEXT DEFAULT NULL");
-} catch (err) {
-  // column already exists
-}
+  db.exec("ALTER TABLE facebook_accounts ADD COLUMN assigned_proxy TEXT;");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE facebook_accounts ADD COLUMN fallback_for_account_id TEXT DEFAULT NULL;");
+} catch (e) {}
 
 
 const getSearchesStmt = db.prepare("SELECT * FROM searches ORDER BY created_at ASC");
@@ -81,7 +86,7 @@ const addAccountStmt = db.prepare(`
   VALUES (@id, @status)
 `);
 const getAccountsStmt = db.prepare(`
-  SELECT a.id, a.status, a.assigned_search_id, a.error_count, a.success_count, a.last_used, a.created_at, a.assigned_proxy, s.keyword as assigned_keyword, s.location as assigned_location
+  SELECT a.id, a.status, a.assigned_search_id, a.error_count, a.success_count, a.last_used, a.created_at, a.assigned_proxy, a.fallback_for_account_id, s.keyword as assigned_keyword, s.location as assigned_location
   FROM facebook_accounts a
   LEFT JOIN searches s ON a.assigned_search_id = s.id
   ORDER BY a.created_at DESC
@@ -101,11 +106,8 @@ const updateAccountStatsFailureStmt = db.prepare(`
   SET error_count = error_count + 1, last_used = @last_used
   WHERE id = @id
 `);
-const updateAccountAssignmentStmt = db.prepare(`
-  UPDATE facebook_accounts
-  SET assigned_search_id = @search_id
-  WHERE id = @id
-`);
+const updateAccountAssignmentStmt = db.prepare("UPDATE facebook_accounts SET assigned_search_id = @searchId WHERE id = @id");
+const updateAccountFallbackStmt = db.prepare("UPDATE facebook_accounts SET fallback_for_account_id = @fallbackId WHERE id = @id");
 const updateAccountProxyStmt = db.prepare(`
   UPDATE facebook_accounts
   SET assigned_proxy = @proxy
@@ -214,8 +216,12 @@ export function updateAccountStats(id, success) {
 }
 
 export function updateAccountAssignment(id, searchId) {
-  const search_id = searchId ? parseInt(searchId, 10) : null;
-  updateAccountAssignmentStmt.run({ id, search_id });
+  // Map searchId correctly since we updated the statement parameter
+  updateAccountAssignmentStmt.run({ id, searchId });
+}
+
+export function updateAccountFallback(id, fallbackId) {
+  updateAccountFallbackStmt.run({ id, fallbackId: fallbackId || null });
 }
 
 export function updateAccountProxy(id, proxy) {

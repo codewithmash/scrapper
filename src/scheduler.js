@@ -22,7 +22,10 @@ async function runPlatform(platform) {
   const searches = getSearches().filter((s) => s.platform === platform);
   if (searches.length === 0) return;
 
-  for (const search of searches) {
+  await Promise.allSettled(searches.map(async (search) => {
+    // Add a slight random initial delay to prevent instant 10x spikes
+    await new Promise((r) => setTimeout(r, Math.random() * 2000));
+    
     const startTime = Date.now();
     try {
       console.log(`[${platform}] 🔍 Scraping "${search.keyword}"...`);
@@ -41,9 +44,7 @@ async function runPlatform(platform) {
         recordPollingMetric(platform, search.id, 0, Date.now() - startTime, 0, null);
       }
     }
-    // Small stagger between searches on the same platform.
-    await new Promise((r) => setTimeout(r, 1500));
-  }
+  }));
 }
 
 /** Self-rescheduling loop for a platform (setTimeout, not setInterval, to avoid overlap). */

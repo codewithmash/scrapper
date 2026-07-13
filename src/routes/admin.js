@@ -9,6 +9,7 @@ import {
   getAccounts, 
   updateAccountStatus, 
   updateAccountAssignment, 
+  updateAccountFallback,
   deleteAccount, 
   getPollingMetrics, 
   syncAccountsWithDisk
@@ -158,8 +159,25 @@ router.post("/accounts/assign", (req, res) => {
   if (!id) {
     return res.status(400).json({ error: "id required" });
   }
-  updateAccountAssignment(id, searchId);
-  res.json({ success: true });
+  try {
+    updateAccountAssignment(id, searchId);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/accounts/fallback", (req, res) => {
+  const { id, fallbackId } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "id required" });
+  }
+  try {
+    updateAccountFallback(id, fallbackId);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // --- Metrics ---
