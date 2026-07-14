@@ -2,6 +2,8 @@ import fs from "node:fs";
 import admin from "firebase-admin";
 import { config } from "./config.js";
 
+// Firebase Admin initialized with renamed root file
+
 let messaging = null;
 
 /** Lazily initialize the Firebase Admin SDK from the service account file. */

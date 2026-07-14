@@ -156,10 +156,16 @@ el.navBtns.forEach(btn => {
     btn.classList.add("active");
     const tabId = btn.dataset.tab;
     document.getElementById(tabId).classList.remove("hidden");
-    if (tabId === "tab-accounts") loadAccounts();
+    
+    if (tabId === "tab-listings") {
+      unreadListingsCount = 0;
+      const badge = document.getElementById("dashboard-badge");
+      if (badge) badge.style.display = "none";
+      loadListings();
+    }
+    else if (tabId === "tab-accounts") loadAccounts();
     else if (tabId === "tab-metrics") loadMetrics();
     else if (tabId === "tab-searches") loadSearches();
-    else if (tabId === "tab-listings") loadListings();
     else if (tabId === "tab-cookies") loadCookies();
     else if (tabId === "tab-proxies") loadProxies();
   };
@@ -254,11 +260,45 @@ el.saveSearchBtn.onclick = async () => {
   loadSearches();
 };
 
+const seenListingsInSession = new Set();
+let unreadListingsCount = 0;
 let allListings = [];
 
 async function loadListings() {
   try {
-    allListings = await API.getListings();
+    const fetched = await API.getListings();
+
+    if (seenListingsInSession.size === 0) {
+      // First load, store all current listing IDs in seen set
+      fetched.forEach(l => seenListingsInSession.add(String(l.id)));
+    } else {
+      // Subsequent loads: find listings we haven't seen in this session
+      const unread = fetched.filter(l => !seenListingsInSession.has(String(l.id)));
+      if (unread.length > 0) {
+        unread.forEach(l => seenListingsInSession.add(String(l.id)));
+
+        // If the user is on another tab, increment the unread count and show the badge
+        const tabListingsHidden = document.getElementById("tab-listings")?.classList.contains("hidden");
+        if (tabListingsHidden) {
+          unreadListingsCount += unread.length;
+          const badge = document.getElementById("dashboard-badge");
+          if (badge) {
+            badge.textContent = unreadListingsCount;
+            badge.style.display = "inline-block";
+          }
+        }
+      }
+    }
+
+    // If the listings tab is active, reset count and hide the badge
+    const tabListingsHidden = document.getElementById("tab-listings")?.classList.contains("hidden");
+    if (!tabListingsHidden) {
+      unreadListingsCount = 0;
+      const badge = document.getElementById("dashboard-badge");
+      if (badge) badge.style.display = "none";
+    }
+
+    allListings = fetched;
     populateBrandDropdown();
     renderListings();
   } catch(err) {
