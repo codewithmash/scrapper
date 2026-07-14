@@ -273,6 +273,22 @@ async function loadNotificationHistory() {
       // Reset to first page when new events arrive
       notifCurrentPage = 1;
     }
+    // Detect new events and show desktop notification
+    if (notifHistoryCache.length > 0 && events.length > notifHistoryCache.length) {
+      var latestEvent = events[0];
+      if (latestEvent) {
+        var notifTitle = latestEvent.title || 'New Notification';
+        var notifBody = latestEvent.message || '';
+        var statusIcon = latestEvent.status === 'sent' ? '\u2705' : latestEvent.status === 'error' ? '\u274C' : '\u2139\uFE0F';
+        var platform = latestEvent.platform ? (' [' + latestEvent.platform + ']') : '';
+        showDesktopNotification(
+          statusIcon + ' ' + notifTitle.substring(0, 80),
+          notifBody ? notifBody.substring(0, 120) : ('Channel: ' + (latestEvent.channel || '-') + platform),
+          { tag: 'mkt-notif' }
+        );
+      }
+    }
+    
     notifHistoryCache = events;
     
     renderNotifTable(events);
@@ -641,6 +657,20 @@ async function loadListings() {
           unreadListingsCount += unread.length;
           const badge = document.getElementById("dashboard-badge");
           if (badge) { badge.textContent = unreadListingsCount; badge.style.display = "inline-block"; }
+
+          // Show desktop notification for new listings
+          if (unread.length === 1) {
+            var item = unread[0];
+            showDesktopNotification(
+              item.platform + ': New Listing Found',
+              '$' + (item.price != null ? item.price : '?') + ' - ' + ((item.title || '').substring(0, 60))
+            );
+          } else if (unread.length > 1) {
+            showDesktopNotification(
+              '\u{1F3AF} ' + unread.length + ' New Listings',
+              'Across ' + new Set(unread.map(function(i) { return i.platform; })).size + ' platform(s)'
+            );
+          }
 
           // Clickable toasts that navigate to Notifications tab on click
           if (unread.length === 1) {
@@ -1174,6 +1204,59 @@ if (menuToggle && sidebar && sidebarOverlay) {
 }
 
 // ============================================================
+// DESKTOP NOTIFICATIONS (Web Notification API)
+// ============================================================
+
+// Request permission for browser desktop notifications
+function requestDesktopNotifPermission() {
+  if (!("Notification" in window)) {
+    console.log('[Desktop Notif] Not supported in this browser');
+    return;
+  }
+  if (Notification.permission === "granted") return;
+  if (Notification.permission === "denied") {
+    console.log('[Desktop Notif] Permission denied by user');
+    return;
+  }
+  // Request permission
+  Notification.requestPermission().then(function(perm) {
+    if (perm === 'granted') {
+      console.log('[Desktop Notif] Permission granted!');
+    }
+  }).catch(function(err) {
+    console.error('[Desktop Notif] Permission request failed:', err);
+  });
+}
+
+// Show a desktop notification
+function showDesktopNotification(title, body, opts) {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+  
+  try {
+    var notif = new Notification(title, {
+      body: body || '',
+      icon: '/favicon.ico',
+      tag: 'mkt-alert-' + Date.now(),
+      ...opts
+    });
+    
+    // Bring tab to focus when clicked
+    notif.onclick = function() {
+      window.focus();
+      this.close();
+    };
+    
+    // Auto-close after 10 seconds
+    setTimeout(function() { notif.close(); }, 10000);
+    
+    return notif;
+  } catch(e) {
+    console.error('[Desktop Notif] Error:', e);
+  }
+}
+
+// ============================================================
 // NOTIFICATION BELL DROPDOWN (Dashboard header)
 // ============================================================
 let notifDropdownData = [];
@@ -1350,6 +1433,6 @@ function startAutoRefresh() {
 function stopAutoRefresh() { if (autoRefreshInterval) { clearInterval(autoRefreshInterval); autoRefreshInterval = null; } }
 
 const _origShowDashboard = showDashboard;
-window.showDashboard = function() { _origShowDashboard(); startAutoRefresh(); loadNotifDropdown(); };
+window.showDashboard = function() { _origShowDashboard(); startAutoRefresh(); loadNotifDropdown(); requestDesktopNotifPermission(); };
 const _origShowLogin = showLogin;
 window.showLogin = function() { _origShowLogin(); stopAutoRefresh(); };
