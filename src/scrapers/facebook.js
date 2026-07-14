@@ -4,7 +4,7 @@ import { createCursor } from "ghost-cursor";
 import { normalize, withinPrice } from "../normalize.js";
 import { loadProxies } from "../sessions.js";
 import { config } from "../config.js";
-import db, { logHealthEvent, recordPollingMetric, markAccountFailed, markAccountSuccess, getAccounts, deleteAccount, updateListingTimestamp } from "../db.js";
+import db, { logHealthEvent, recordPollingMetric, markAccountFailed, markAccountSuccess, getAccounts, deleteAccount, updateListingTimestamp, updateListingDetails } from "../db.js";
 import { pushAlert } from "../notify.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -82,6 +82,16 @@ function mapNode(n, search) {
     }
   }
 
+  const extra = {
+    sellerName: n.marketplace_listing_seller?.name || null,
+    sellerId: n.marketplace_listing_seller?.id || null,
+    categoryId: n.marketplace_listing_category_id || null,
+    deliveryTypes: n.delivery_types || null,
+    isPending: n.is_pending || false,
+    isSold: n.is_sold || false,
+    strikethroughPrice: n.strikethrough_price?.formatted_amount || null,
+  };
+
   return normalize({
     id: n.id || n.legacy_id,
     title: n.marketplace_listing_title || n.custom_title,
@@ -92,6 +102,7 @@ function mapNode(n, search) {
     images: images,
     platform: "facebook",
     listed_at: n.creation_time ? new Date(n.creation_time * 1000).toISOString() : null,
+    extra,
   });
 }
 
@@ -329,13 +340,48 @@ export async function scrapeFacebook(search) {
                   }
                   pos = html.indexOf(idStr, pos + 1);
                 }
-                
-                if (extractedTs) {
-                  const listedAt = new Date(extractedTs * 1000).toISOString();
-                  console.log(`[facebook background] Set listed_at for ${item.id} to ${listedAt}`);
-                  // Update database payload
-                  await updateListingTimestamp("facebook", item.id, listedAt);
+
+                // Extract description and attributes from HTML page content
+                let description = null;
+                const descMatch = html.match(/"description"\s*:\s*\{\s*"text"\s*:\s*"([^"]+)"\s*\}/);
+                if (descMatch) {
+                  try { description = JSON.parse(`"${descMatch[1]}"`); } catch(e) {}
                 }
+                if (!description) {
+                  const redactedMatch = html.match(/"redacted_description"\s*:\s*\{\s*"text"\s*:\s*"([^"]+)"\s*\}/);
+                  if (redactedMatch) {
+                    try { description = JSON.parse(`"${redactedMatch[1]}"`); } catch(e) {}
+                  }
+                }
+                
+                let mileage = null;
+                const mileageMatch = html.match(/Driven\s+([\d,]+)\s*(?:km|miles|mi)/i) || html.match(/([\d,]+)\s*(?:km|miles|mi)\s+driven/i);
+                if (mileageMatch) mileage = mileageMatch[1] + (html.match(/miles|mi/i) ? " miles" : " km");
+
+                let transmission = null;
+                const transMatch = html.match(/(Manual|Automatic)\s+transmission/i) || html.match(/(Manual|Automatic)\s+gearbox/i);
+                if (transMatch) transmission = transMatch[1];
+
+                let color = null;
+                const colorMatch = html.match(/Exterior\s+color:\s*([a-zA-Z]{3,20})/i) || html.match(/\bColor:\s*([a-zA-Z]{3,20})/i);
+                if (colorMatch && colorMatch[1].toLowerCase() !== 'var') color = colorMatch[1];
+
+                let fuelType = null;
+                const fuelMatch = html.match(/(Gasoline|Diesel|Electric|Hybrid)\s+fuel/i) || html.match(/Fuel\s+type:\s*([a-zA-Z]+)/i);
+                if (fuelMatch) fuelType = fuelMatch[1];
+
+                const updates = { extra: {} };
+                if (extractedTs) {
+                  updates.listed_at = new Date(extractedTs * 1000).toISOString();
+                }
+                if (description) updates.extra.description = description;
+                if (mileage) updates.extra.mileage = mileage;
+                if (transmission) updates.extra.transmission = transmission;
+                if (color) updates.extra.color = color;
+                if (fuelType) updates.extra.fuelType = fuelType;
+
+                console.log(`[facebook background] Extracted details for ${item.id}:`, JSON.stringify(updates.extra));
+                await updateListingDetails("facebook", item.id, updates);
               } catch (e) {
                 console.warn(`[facebook background] Failed to fetch details for ${item.id}:`, e.message);
               }

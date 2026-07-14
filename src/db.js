@@ -356,6 +356,10 @@ if (existing.length === 0 && config.searches && config.searches.length > 0) {
 }
 
 export async function updateListingTimestamp(platform, listingId, listedAt) {
+  return updateListingDetails(platform, listingId, { listed_at: listedAt });
+}
+
+export async function updateListingDetails(platform, listingId, updates) {
   const maxAttempts = 3;
   const delayMs = 500;
   
@@ -364,25 +368,31 @@ export async function updateListingTimestamp(platform, listingId, listedAt) {
       const row = getPayloadStmt.get({ platform, listing_id: String(listingId) });
       if (row) {
         const item = JSON.parse(row.payload);
-        item.listed_at = listedAt;
+        for (const [key, value] of Object.entries(updates)) {
+          if (key === 'extra' && typeof value === 'object' && value !== null) {
+            item.extra = { ...(item.extra || {}), ...value };
+          } else {
+            item[key] = value;
+          }
+        }
         updatePayloadStmt.run({
           platform,
           listing_id: String(listingId),
           payload: JSON.stringify(item),
         });
-        console.log(`[db] Successfully updated listed_at for ${platform}:${listingId} to ${listedAt} (attempt ${attempt})`);
+        console.log(`[db] Successfully updated details for ${platform}:${listingId} (attempt ${attempt})`);
         return true;
       }
       console.warn(`[db] Listing ${platform}:${listingId} not found in DB on attempt ${attempt}/${maxAttempts}. Retrying...`);
     } catch (err) {
-      console.error(`[db] Error updating listing timestamp on attempt ${attempt}:`, err.message);
+      console.error(`[db] Error updating listing details on attempt ${attempt}:`, err.message);
     }
     
     if (attempt < maxAttempts) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
-  console.error(`[db] Failed to update listed_at for ${platform}:${listingId} after ${maxAttempts} attempts`);
+  console.error(`[db] Failed to update details for ${platform}:${listingId} after ${maxAttempts} attempts`);
   return false;
 }
 

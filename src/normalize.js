@@ -90,7 +90,7 @@ async function loadNhtsaMakes() {
  * Build a normalized listing. Missing optional fields become null so the
  * output shape is always stable.
  */
-export function normalize({ id, title, price, location, url, image, images, platform, listed_at }) {
+export function normalize({ id, title, price, location, url, image, images, platform, listed_at, extra }) {
   // If images array is provided use it, otherwise fallback to single image, otherwise empty array
   let finalImages = [];
   if (Array.isArray(images) && images.length > 0) {
@@ -146,6 +146,7 @@ export function normalize({ id, title, price, location, url, image, images, plat
     images: finalImages, // All available images
     platform,
     listed_at: toIso(listed_at),
+    extra: extra || null,
   };
 }
 

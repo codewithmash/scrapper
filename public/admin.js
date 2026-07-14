@@ -86,10 +86,13 @@ const el = {
   modalDetails: document.getElementById("modal-details"),
   closeDetailsBtn: document.getElementById("close-details-btn"),
   detailsTitle: document.getElementById("details-title"),
+  detailsPlatformBadge: document.getElementById("details-platform-badge"),
   detailsImageCarousel: document.getElementById("details-image-carousel"),
   detailsPrice: document.getElementById("details-price"),
   detailsLocation: document.getElementById("details-location"),
-  detailsPlatform: document.getElementById("details-platform"),
+  detailsSpecsGrid: document.getElementById("details-specs-grid"),
+  detailsDescContainer: document.getElementById("details-desc-container"),
+  detailsDescription: document.getElementById("details-description"),
   detailsListed: document.getElementById("details-listed"),
   detailsSeen: document.getElementById("details-seen"),
   detailsLink: document.getElementById("details-link")
@@ -325,8 +328,15 @@ function renderListings() {
       ? new Date(l.listed_at).toLocaleString() 
       : `Detected: ${l.first_seen ? new Date(l.first_seen).toLocaleString() : 'Recently'}`;
     return `
-      <div class="glass-panel listing-card" data-id="${l.id}" style="cursor: pointer;">
-        <div class="img-wrapper" style="background-image: url('${l.image || ''}');"></div>
+      <div class="glass-panel listing-card" data-id="${l.id}">
+        <div class="img-wrapper" style="background-image: url('${l.image || ''}'); position: relative;">
+          <button class="view-details-btn" title="View Details">
+            <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
         <div class="details">
           <span class="platform-badge platform-${l.platform}">${l.platform}</span>
           <h4><a href="${l.url}" target="_blank" onclick="event.stopPropagation();" style="color: white; text-decoration: none;">${l.title}</a></h4>
@@ -337,21 +347,33 @@ function renderListings() {
     `;
   }).join("");
 
-  // Attach click handlers for opening details modal
-  el.listingsGrid.querySelectorAll('.listing-card').forEach(card => { card.addEventListener('click', () => {
-      const id = card.getAttribute('data-id');
-      const listing = allListings.find(l => String(l.id) === String(id));
-      if (listing) openDetailsModal(listing);
-    });
+  // Attach click handlers for opening details modal ONLY on the eye button
+  el.listingsGrid.querySelectorAll('.listing-card').forEach(card => {
+    const id = card.getAttribute('data-id');
+    const listing = allListings.find(l => String(l.id) === String(id));
+    if (!listing) return;
+
+    const btn = card.querySelector('.view-details-btn');
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openDetailsModal(listing);
+      });
+    }
   });
 }
 
 function openDetailsModal(listing) {
   el.detailsTitle.textContent = listing.title || 'Unknown Title';
+  
+  if (el.detailsPlatformBadge) {
+    el.detailsPlatformBadge.textContent = listing.platform;
+    el.detailsPlatformBadge.className = `platform-badge platform-${listing.platform}`;
+  }
+
   el.detailsPrice.textContent = `${listing.currency || '$'}${listing.price != null ? listing.price : '?'}`;
   el.detailsLocation.textContent = listing.location || 'Unknown Location';
-  el.detailsPlatform.textContent = listing.platform;
-  el.detailsListed.textContent = listing.listed_at ? new Date(listing.listed_at).toLocaleString() : 'Not Available (Facebook Hidden)';
+  el.detailsListed.textContent = listing.listed_at ? new Date(listing.listed_at).toLocaleString() : 'Waiting for background fetch...';
   el.detailsSeen.textContent = listing.first_seen ? new Date(listing.first_seen).toLocaleString() : 'Recently';
   el.detailsLink.href = listing.url || '#';
   
@@ -359,11 +381,73 @@ function openDetailsModal(listing) {
   let imagesHtml = '';
   const images = Array.isArray(listing.images) && listing.images.length > 0 ? listing.images : (listing.image ? [listing.image] : []);
   if (images.length > 0) {
-    imagesHtml = images.map(img => `<img src="${img}" style="height: 300px; border-radius: 8px; object-fit: contain; background: rgba(0,0,0,0.5); scroll-snap-align: start;" />`).join("");
+    imagesHtml = images.map(img => `<img src="${img}" style="height: 250px; border-radius: 8px; object-fit: contain; background: rgba(0,0,0,0.5); scroll-snap-align: start;" />`).join("");
   } else {
-    imagesHtml = '<div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border-radius: 8px; color: var(--text-secondary);">No images available</div>';
+    imagesHtml = '<div style="width: 100%; height: 250px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border-radius: 8px; color: var(--text-secondary);">No images available</div>';
   }
   el.detailsImageCarousel.innerHTML = imagesHtml;
+
+  // Build specifications grid
+  if (el.detailsSpecsGrid) {
+    const extra = listing.extra || {};
+    const specs = [];
+
+    // Core Brand/Make
+    if (listing.make) {
+      specs.push({ label: 'Brand', value: listing.make, icon: '🏷️' });
+    }
+    
+    // Add extra details if they exist
+    if (extra.mileage) {
+      specs.push({ label: 'Mileage', value: extra.mileage, icon: '🛣️' });
+    }
+    if (extra.transmission) {
+      specs.push({ label: 'Transmission', value: extra.transmission, icon: '⚙️' });
+    }
+    if (extra.color) {
+      specs.push({ label: 'Exterior Color', value: extra.color, icon: '🎨' });
+    }
+    if (extra.fuelType) {
+      specs.push({ label: 'Fuel Type', value: extra.fuelType, icon: '⛽' });
+    }
+    if (extra.sellerName) {
+      specs.push({ label: 'Seller', value: extra.sellerName, icon: '👤' });
+    }
+    if (extra.strikethroughPrice) {
+      specs.push({ label: 'Original Price', value: extra.strikethroughPrice, icon: '🏷️' });
+    }
+    if (extra.deliveryTypes && Array.isArray(extra.deliveryTypes)) {
+      specs.push({ label: 'Delivery', value: extra.deliveryTypes.join(', '), icon: '📦' });
+    }
+
+    if (specs.length > 0) {
+      el.detailsSpecsGrid.innerHTML = specs.map(spec => `
+        <div class="spec-pill" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; min-width: 130px;">
+          <span style="font-size: 1.4rem;">${spec.icon}</span>
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">${spec.label}</span>
+            <span style="font-size: 0.88rem; font-weight: 600; color: white; margin-top: 2px;">${spec.value}</span>
+          </div>
+        </div>
+      `).join("");
+      document.getElementById('details-specs-container').style.display = 'block';
+    } else {
+      el.detailsSpecsGrid.innerHTML = '';
+      document.getElementById('details-specs-container').style.display = 'none';
+    }
+  }
+
+  // Populate description
+  if (el.detailsDescContainer && el.detailsDescription) {
+    const desc = listing.extra?.description || null;
+    if (desc) {
+      el.detailsDescription.textContent = desc;
+      el.detailsDescContainer.style.display = 'block';
+    } else {
+      el.detailsDescription.textContent = '';
+      el.detailsDescContainer.style.display = 'none';
+    }
+  }
   
   el.modalDetails.classList.remove('hidden');
 }
