@@ -175,12 +175,6 @@ function renderNotifTable(events) {
     return { icon: '\u2139\uFE0F', cls: 'info', color: '#60a5fa' };
   }
   
-  // Escape HTML to prevent XSS
-  function esc(str) {
-    if (str == null) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  
   tbody.innerHTML = pageEvents.map(function(e, idx) {
     var globalIdx = startIdx + idx;
     var si = getStatusInfo(e.status);
@@ -1390,6 +1384,13 @@ function notifySmart(notifType, title, message, toastOpts) {
 // ============================================================
 // NOTIFICATION BELL DROPDOWN (Dashboard header)
 // ============================================================
+
+// Escape HTML to prevent XSS — global function used by renderNotifTable() and populateNotifDropdown()
+function esc(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 let notifDropdownData = [];
 var lastNotifPollCount = 0; // tracks last known count for bell badge
 
