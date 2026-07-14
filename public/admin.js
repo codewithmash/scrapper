@@ -80,6 +80,7 @@ const el = {
   filterListingsPlatform: document.getElementById("filter-listings-platform"),
   filterListingsPrice: document.getElementById("filter-listings-price"),
   filterPriceDisplay: document.getElementById("filter-price-display"),
+  filterListingsBrand: document.getElementById("filter-listings-brand"),
   sortListings: document.getElementById("sort-listings"),
   
   modalDetails: document.getElementById("modal-details"),
@@ -254,9 +255,33 @@ let allListings = [];
 async function loadListings() {
   try {
     allListings = await API.getListings();
+    populateBrandDropdown();
     renderListings();
   } catch(err) {
     console.error(err);
+  }
+}
+
+function populateBrandDropdown() {
+  if (!el.filterListingsBrand) return;
+  const currentSelected = el.filterListingsBrand.value;
+  
+  const brands = new Set();
+  allListings.forEach(l => {
+    if (l.make) brands.add(l.make);
+  });
+  
+  const sortedBrands = Array.from(brands).sort();
+  
+  el.filterListingsBrand.innerHTML = `
+    <option value="">All Brands</option>
+    ${sortedBrands.map(b => `<option value="${b}">${b}</option>`).join("")}
+  `;
+  
+  if (sortedBrands.includes(currentSelected)) {
+    el.filterListingsBrand.value = currentSelected;
+  } else {
+    el.filterListingsBrand.value = "";
   }
 }
 
@@ -264,6 +289,7 @@ function renderListings() {
   const keywordFilter = el.filterListingsKeyword?.value.toLowerCase() || "";
   const locationFilter = el.filterListingsLocation?.value.toLowerCase() || "";
   const platformFilter = el.filterListingsPlatform?.value || "";
+  const brandFilter = el.filterListingsBrand?.value || "";
   const maxPriceFilter = parseInt(el.filterListingsPrice?.value) || 10000;
 
   if (el.filterPriceDisplay) {
@@ -274,6 +300,7 @@ function renderListings() {
 
   let filtered = allListings.filter(l => {
     if (platformFilter && l.platform !== platformFilter) return false;
+    if (brandFilter && l.make !== brandFilter) return false;
     if (keywordFilter && (!l.title || !l.title.toLowerCase().includes(keywordFilter))) return false;
     if (locationFilter && (!l.location || !l.location.toLowerCase().includes(locationFilter))) return false;
     if (maxPriceFilter < 10000 && l.price != null && l.price > maxPriceFilter) return false;
@@ -349,6 +376,7 @@ if (el.filterListingsKeyword) el.filterListingsKeyword.addEventListener("input",
 if (el.filterListingsLocation) el.filterListingsLocation.addEventListener("input", renderListings);
 if (el.filterListingsPlatform) el.filterListingsPlatform.addEventListener("change", renderListings);
 if (el.filterListingsPrice) el.filterListingsPrice.addEventListener("input", renderListings);
+if (el.filterListingsBrand) el.filterListingsBrand.addEventListener("change", renderListings);
 if (el.sortListings) el.sortListings.addEventListener("change", renderListings);
 
 el.refreshListingsBtn.onclick = async () => {
