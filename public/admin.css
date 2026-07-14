@@ -1880,6 +1880,7 @@ select option {
   transition: var(--transition);
   position: relative;
   padding: 0;
+  overflow: visible;
 }
 
 .notif-bell-btn:hover {
