@@ -534,8 +534,19 @@
       </div>
       
       <!-- Image Carousel -->
-      <div id="details-image-carousel" style="display: flex; overflow-x: auto; gap: 12px; margin-bottom: 20px; padding-bottom: 10px; scroll-snap-type: x mandatory; scrollbar-width: thin;">
-        <!-- JS injected images -->
+      <div id="details-image-carousel-wrap" style="position:relative; margin-bottom: 20px; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.4); min-height: 200px;">
+        <div id="details-image-carousel" style="display: flex; overflow-x: auto; gap: 0; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; height: 280px;">
+          <!-- JS injected images -->
+        </div>
+        <!-- Carousel Controls -->
+        <button id="carousel-prev-btn" style="display:none; position:absolute; left:8px; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.6); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; transition:all 0.2s; opacity:0; align-items:center; justify-content:center; font-size:1.2rem; line-height:1; padding:0;" onmouseover="this.style.background='rgba(99,102,241,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">&#9664;</button>
+        <button id="carousel-next-btn" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.6); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; transition:all 0.2s; opacity:0; align-items:center; justify-content:center; font-size:1.2rem; line-height:1; padding:0;" onmouseover="this.style.background='rgba(99,102,241,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">&#9654;</button>
+        <!-- Image Counter -->
+        <span id="carousel-counter" style="display:none; position:absolute; bottom:10px; right:12px; z-index:10; background:rgba(0,0,0,0.7); color:white; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; font-family:'Inter',sans-serif;">1 / 1</span>
+        <!-- Dots Container -->
+        <div id="carousel-dots" style="display:none; position:absolute; bottom:10px; left:50%; transform:translateX(-50%); z-index:10; gap:6px; align-items:center;"></div>
+        <!-- Hover overlay for controls -->
+        <div id="carousel-hover-area" style="position:absolute; inset:0; z-index:5;"></div>
       </div>
       
       <!-- Price & Basic Details Summary -->

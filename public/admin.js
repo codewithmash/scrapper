@@ -810,8 +810,113 @@ function openDetailsModal(listing) {
   el.detailsListed.textContent = listing.listed_at ? new Date(listing.listed_at).toLocaleString() : 'Waiting for background fetch...';
   el.detailsSeen.textContent = listing.first_seen ? new Date(listing.first_seen).toLocaleString() : 'Recently';
   el.detailsLink.href = listing.url || '#';
-  const images = Array.isArray(listing.images) && listing.images.length > 0 ? listing.images : (listing.image ? [listing.image] : []);
-  el.detailsImageCarousel.innerHTML = images.length > 0 ? images.map(img => `<img src="${img}" style="height:250px;border-radius:8px;object-fit:contain;background:rgba(0,0,0,0.5);scroll-snap-align:start;" />`).join("") : '<div style="width:100%;height:250px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);border-radius:8px;color:var(--text-secondary);">No images available</div>';
+  
+  // --- Image Carousel with Navigation ---
+  const rawImages = Array.isArray(listing.images) && listing.images.length > 0 ? listing.images : (listing.image ? [listing.image] : []);
+  const allImgs = rawImages.filter(function(img) { return img && img.trim(); });
+  var carousel = el.detailsImageCarousel;
+  var prevBtn = document.getElementById('carousel-prev-btn');
+  var nextBtn = document.getElementById('carousel-next-btn');
+  var counter = document.getElementById('carousel-counter');
+  var dots = document.getElementById('carousel-dots');
+  
+  if (!carousel) return;
+  
+  if (allImgs.length === 0) {
+    carousel.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.9rem;">No images available</div>';
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (counter) counter.style.display = 'none';
+    if (dots) dots.style.display = 'none';
+  } else {
+    // Render images with scroll-snap for perfect centering
+    carousel.innerHTML = allImgs.map(function(img, i) {
+      return '<div style="flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center;scroll-snap-align:start;overflow:hidden;position:relative;" data-index="' + i + '">' +
+        '<img src="' + img.replace(/"/g, '&quot;') + '" style="max-width:100%;max-height:100%;object-fit:contain;transition:opacity 0.3s;" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=color:var(--text-muted);font-size:0.8rem>Failed to load</span>\'" />' +
+      '</div>';
+    }).join('');
+    
+    // Show controls for multiple images
+    if (allImgs.length > 1) {
+      if (prevBtn) { prevBtn.style.display = 'flex'; prevBtn.style.opacity = '0.7'; }
+      if (nextBtn) { nextBtn.style.display = 'flex'; nextBtn.style.opacity = '0.7'; }
+      if (counter) { counter.style.display = 'inline-block'; counter.textContent = '1 / ' + allImgs.length; }
+      
+      // Show dots
+      if (dots) {
+        dots.style.display = 'flex';
+        dots.innerHTML = allImgs.map(function(_, i) {
+          return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + (i === 0 ? 'var(--accent-color)' : 'rgba(255,255,255,0.3)') + ';cursor:pointer;transition:all 0.3s;margin:0 3px;" data-dot="' + i + '"></span>';
+        }).join('');
+      }
+      
+      // Clean up old scroll listener to prevent memory leak
+      if (carousel._scrollHandler) {
+        carousel.removeEventListener('scroll', carousel._scrollHandler);
+      }
+      
+      // Scroll handler to update counter & dots
+      carousel._scrollHandler = function() {
+        var scrollLeft = carousel.scrollLeft;
+        var w = carousel.clientWidth || 1;
+        var idx = Math.round(scrollLeft / w);
+        if (idx < 0) idx = 0;
+        if (idx >= allImgs.length) idx = allImgs.length - 1;
+        if (counter) counter.textContent = (idx + 1) + ' / ' + allImgs.length;
+        if (dots) {
+          var allDots = dots.querySelectorAll('span');
+          allDots.forEach(function(d, i) {
+            d.style.background = i === idx ? 'var(--accent-color)' : 'rgba(255,255,255,0.3)';
+          });
+        }
+      };
+      carousel.addEventListener('scroll', carousel._scrollHandler);
+      
+      // Dot click
+      if (dots) {
+        dots.querySelectorAll('span').forEach(function(dot) {
+          dot.addEventListener('click', function() {
+            var idx = parseInt(this.getAttribute('data-dot'));
+            if (!isNaN(idx) && carousel) {
+              carousel.scrollTo({ left: idx * carousel.clientWidth, behavior: 'smooth' });
+            }
+          });
+        });
+      }
+      
+      // Prev/Next click
+      if (prevBtn) {
+        prevBtn.onclick = function() {
+          var w = carousel.clientWidth || 1;
+          carousel.scrollBy({ left: -w, behavior: 'smooth' });
+        };
+      }
+      if (nextBtn) {
+        nextBtn.onclick = function() {
+          var w = carousel.clientWidth || 1;
+          carousel.scrollBy({ left: w, behavior: 'smooth' });
+        };
+      }
+      
+      // Show controls on hover
+      var hoverArea = document.getElementById('carousel-hover-area');
+      if (hoverArea) {
+        hoverArea.onmouseenter = function() {
+          if (prevBtn) prevBtn.style.opacity = '0.9';
+          if (nextBtn) nextBtn.style.opacity = '0.9';
+        };
+        hoverArea.onmouseleave = function() {
+          if (prevBtn) prevBtn.style.opacity = '0.4';
+          if (nextBtn) nextBtn.style.opacity = '0.4';
+        };
+      }
+    } else {
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+      if (counter) counter.style.display = 'none';
+      if (dots) dots.style.display = 'none';
+    }
+  }
 
   if (el.detailsSpecsGrid) {
     const extra = listing.extra || {};

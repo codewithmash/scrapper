@@ -2248,6 +2248,21 @@ select option {
 }
 
 /* ============================================================
+   IMAGE CAROUSEL
+   ============================================================ */
+#details-image-carousel::-webkit-scrollbar {
+  display: none;
+}
+#details-image-carousel {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+#details-image-carousel img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ============================================================
    EMPTY STATE
    ============================================================ */
 .empty-state {
