@@ -1260,6 +1260,7 @@ function showDesktopNotification(title, body, opts) {
 // NOTIFICATION BELL DROPDOWN (Dashboard header)
 // ============================================================
 let notifDropdownData = [];
+var lastNotifPollCount = 0; // tracks last known count for bell badge
 
 function populateNotifDropdown(events) {
   const list = document.getElementById('notif-dropdown-list');
@@ -1300,26 +1301,16 @@ async function loadNotifDropdown() {
     var events = data.events || [];
     populateNotifDropdown(events);
     
-    // Update bell badge
+    // Update bell badge using own counter (no dependency on notifHistoryCache)
     var badge = document.getElementById('notif-bell-badge');
     if (badge) {
-      var sidebarBadge = document.getElementById('notif-badge');
-      var sidebarBadgeVisible = sidebarBadge && sidebarBadge.style.display !== 'none' && sidebarBadge.textContent !== '0';
-      
-      if (sidebarBadgeVisible) {
-        badge.textContent = sidebarBadge.textContent;
+      if (lastNotifPollCount > 0 && events.length > lastNotifPollCount) {
+        var newCount = events.length - lastNotifPollCount;
+        badge.textContent = newCount > 99 ? '99+' : newCount;
         badge.style.display = 'inline-flex';
-      } else {
-        // Check if new since last poll
-        var notifTabHidden = document.getElementById('tab-notifications')?.classList.contains('hidden');
-        if (notifTabHidden && notifHistoryCache.length > 0 && events.length > notifHistoryCache.length) {
-          var newCount = events.length - notifHistoryCache.length;
-          badge.textContent = newCount > 99 ? '99+' : newCount;
-          badge.style.display = 'inline-flex';
-        } else {
-          badge.style.display = 'none';
-        }
       }
+      // Store current count for next comparison
+      lastNotifPollCount = events.length;
     }
   } catch (err) {
     // Silently fail - dropdown just won't update
@@ -1383,11 +1374,17 @@ loadNotificationHistory = function() {
 // Notification test button
 if (el.testAllNotificationsBtn) el.testAllNotificationsBtn.addEventListener('click', testAllNotifications);
 
-// Also periodically update the dropdown (every 60s)
+// Periodically refresh notification badge in background (every 30s)
 setInterval(function() {
-  if (notifDropdown && notifDropdown.classList.contains('hidden')) {
+  // Always refresh badge in background, regardless of dropdown state
+  if (notifDropdown) {
     loadNotifDropdown();
   }
+}, 30000);
+
+// Also periodically load full notification history for desktop notifications (every 60s)
+setInterval(function() {
+  loadNotificationHistory();
 }, 60000);
 
 // Boot with error logging
@@ -1426,6 +1423,7 @@ function startAutoRefresh() {
     if (el.dashboard.classList.contains("hidden")) return;
     tick++;
     try { await loadListings(); } catch (e) {}
+    try { await loadNotifDropdown(); } catch (e) {}
     if (tick % 2 === 0) { try { await loadSearches(); } catch (e) {} try { await loadAccounts(); } catch (e) {} }
     if (tick % 10 === 0) { try { await loadMetrics(); } catch (e) {} }
   }, 30000);
