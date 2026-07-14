@@ -312,7 +312,7 @@ function renderListings() {
   } else if (sortOption === "price_desc") {
     filtered.sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
   } else {
-    // "latest" relies on natural DB order (listed_at desc) which we receive from API
+    filtered.sort((a, b) => new Date(b.first_seen || 0) - new Date(a.first_seen || 0));
   }
 
   if (filtered.length === 0) {

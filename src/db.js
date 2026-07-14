@@ -138,9 +138,9 @@ const insertStmt = db.prepare(
 );
 
 const recentStmt = db.prepare(
-  `SELECT payload FROM seen_listings
+  `SELECT payload, first_seen FROM seen_listings
    WHERE first_seen >= @since
-   ORDER BY COALESCE(json_extract(payload, '$.listed_at'), first_seen) DESC, first_seen DESC
+   ORDER BY first_seen DESC
    LIMIT @limit`
 );
 
