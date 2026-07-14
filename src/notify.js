@@ -124,7 +124,7 @@ export async function pushAlert(text) {
     try {
       await m.send(message);
       console.log("[notify] Sent FCM health alert");
-      addNotificationEvent({ channel: 'FCM', status: 'sent', title: `Alert: ${text?.slice(0, 60)}`, platform: 'system' });
+      addNotificationEvent({ channel: 'FCM', status: 'sent', title: `Alert: ${text?.slice(0, 300)}`, platform: 'system' });
     } catch (err) {
       console.error("[notify] FCM health alert send failed:", err.message);
       addNotificationEvent({ channel: 'FCM', status: 'failed', title: `FCM alert failed: ${err.message?.slice(0, 60)}`, platform: 'system' });
@@ -145,7 +145,7 @@ export async function pushAlert(text) {
         }),
       });
       console.log("[notify] Sent Telegram health alert");
-      addNotificationEvent({ channel: 'Telegram', status: 'sent', title: `Alert: ${text?.slice(0, 60)}`, platform: 'system' });
+      addNotificationEvent({ channel: 'Telegram', status: 'sent', title: `Alert: ${text?.slice(0, 300)}`, platform: 'system' });
     } catch (err) {
       console.error("[notify] Telegram health alert send failed:", err.message);
       addNotificationEvent({ channel: 'Telegram', status: 'failed', title: `TG alert failed: ${err.message?.slice(0, 60)}`, platform: 'system' });

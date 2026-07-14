@@ -303,13 +303,69 @@
           <svg style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Recent Notification Events
         </h2>
-        <div class="glass-panel">
-          <div id="notification-history" class="notification-history">
-            <div class="empty-state">
-              <div class="empty-state-icon">🔔</div>
-              <div class="empty-state-title">No notifications sent yet</div>
-              <div class="empty-state-text">Notifications will appear here once new listings are scraped or alerts are triggered.</div>
+        <div class="glass-panel table-wrapper" style="padding: 1px;">
+          <table class="data-table notif-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;">Status</th>
+                <th>Message</th>
+                <th style="width: 100px;">Channel</th>
+                <th style="width: 80px;">Platform</th>
+                <th style="width: 160px;">Time</th>
+              </tr>
+            </thead>
+            <tbody id="notification-history-tbody">
+              <!-- JS injected -->
+            </tbody>
+          </table>
+          <div id="notif-pagination" class="pagination-bar">
+            <!-- JS injected pagination -->
+          </div>
+          <div id="notification-history-empty" class="empty-state">
+            <div class="empty-state-icon">🔔</div>
+            <div class="empty-state-title">No notifications sent yet</div>
+            <div class="empty-state-text">Notifications will appear here once new listings are scraped or alerts are triggered.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Details Modal -->
+      <div id="modal-notif-details" class="modal hidden">
+        <div class="glass-panel modal-content" style="max-width: 560px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 25px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div id="notif-detail-icon" style="width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;"></div>
+              <div>
+                <h2 id="notif-detail-title" style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: bold; color: white;">Notification Details</h2>
+                <span id="notif-detail-channel" class="platform-badge" style="margin: 0; font-size: 0.7rem;">system</span>
+              </div>
             </div>
+            <button id="close-notif-detail-btn" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; outline: none;" title="Close">
+              <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+          
+          <!-- Status Badge -->
+          <div id="notif-detail-status-row" style="margin-bottom: 18px;">
+            <span id="notif-detail-status" class="notification-card-status">sent</span>
+            <span id="notif-detail-timestamp" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 10px;"></span>
+          </div>
+          
+          <!-- Full Message -->
+          <div id="notif-detail-msg-container" style="display: none;">
+            <h4 style="margin: 0 0 8px 0; font-size: 0.85rem; color: var(--accent-color); text-transform: uppercase; letter-spacing: 0.5px;">Full Message</h4>
+            <div id="notif-detail-message" style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 14px; font-size: 0.85rem; line-height: 1.5; max-height: 160px; overflow-y: auto; white-space: pre-wrap; color: #d1d5db; margin-bottom: 18px;"></div>
+          </div>
+          
+          <!-- Detail Fields Grid -->
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 16px; margin-bottom: 10px;">
+            <div id="notif-detail-fields" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <!-- JS populated -->
+            </div>
+          </div>
+          
+          <div class="modal-actions" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 18px; margin: 0;">
+            <button id="close-notif-detail-close-btn" class="secondary-btn" style="padding: 10px 20px; width: 100%;">Close</button>
           </div>
         </div>
       </div>

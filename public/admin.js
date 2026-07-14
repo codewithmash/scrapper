@@ -140,12 +140,126 @@ async function loadNotificationStatus() {
   }
 }
 
+var notifCurrentPage = 1;
+var notifPageSize = 10;
+
+function renderNotifTable(events) {
+  var tbody = document.getElementById('notification-history-tbody');
+  var emptyEl = document.getElementById('notification-history-empty');
+  var table = document.querySelector('.notif-table');
+  var pagination = document.getElementById('notif-pagination');
+  if (!tbody) return;
+  
+  if (events.length === 0) {
+    if (table) table.style.display = 'none';
+    if (pagination) pagination.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  
+  if (table) table.style.display = '';
+  if (emptyEl) emptyEl.style.display = 'none';
+  
+  var totalPages = Math.ceil(events.length / notifPageSize);
+  if (notifCurrentPage > totalPages) notifCurrentPage = totalPages;
+  if (notifCurrentPage < 1) notifCurrentPage = 1;
+  
+  var startIdx = (notifCurrentPage - 1) * notifPageSize;
+  var pageEvents = events.slice(startIdx, startIdx + notifPageSize);
+  
+  // Map status to icon, class, and color
+  function getStatusInfo(status) {
+    if (status === 'sent') return { icon: '\u2705', cls: 'success', color: '#4ade80' };
+    if (status === 'error' || status === 'failed') return { icon: '\u274C', cls: 'error', color: '#f87171' };
+    if (status === 'warning') return { icon: '\u26A0\uFE0F', cls: 'warning', color: '#facc15' };
+    return { icon: '\u2139\uFE0F', cls: 'info', color: '#60a5fa' };
+  }
+  
+  // Escape HTML to prevent XSS
+  function esc(str) {
+    if (str == null) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  
+  tbody.innerHTML = pageEvents.map(function(e, idx) {
+    var globalIdx = startIdx + idx;
+    var si = getStatusInfo(e.status);
+    var time = e.timestamp ? new Date(e.timestamp).toLocaleString() : '-';
+    var title = esc(e.title || e.message || 'Notification');
+    var channel = esc(e.channel || '-');
+    var platform = esc(e.platform || '-');
+    
+    return '<tr class="notif-table-row" data-notif-index="' + globalIdx + '" style="cursor:pointer;">' +
+      '<td style="text-align:center;"><span style="font-size:1.2rem;" title="' + esc(e.status) + '">' + si.icon + '</span></td>' +
+      '<td style="max-width:300px;"><div class="n-title" style="font-size:0.85rem;font-weight:500;color:var(--text-primary);white-space:normal;word-break:break-word;line-height:1.4;">' + title + '</div></td>' +
+      '<td><span class="notif-channel-badge" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;">' + channel + '</span></td>' +
+      '<td>' + (platform !== '-' ? '<span class="platform-badge platform-' + platform.toLowerCase() + '" style="font-size:0.65rem;">' + platform + '</span>' : '<span style="color:var(--text-muted);font-size:0.78rem;">-</span>') + '</td>' +
+      '<td style="color:var(--text-muted);font-size:0.78rem;white-space:nowrap;">' + time + '</td>' +
+    '</tr>';
+  }).join('');
+  
+  // Add click handlers
+  tbody.querySelectorAll('.notif-table-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-notif-index'));
+      if (!isNaN(idx) && events[idx]) {
+        openNotifDetails(events[idx]);
+      }
+    });
+  });
+  
+  // Render pagination
+  renderNotifPagination(totalPages, events.length);
+}
+
+function renderNotifPagination(totalPages, totalItems) {
+  var pag = document.getElementById('notif-pagination');
+  if (!pag) return;
+  if (totalPages <= 1) {
+    pag.innerHTML = '<div class="pagination-info">' + totalItems + ' notification' + (totalItems !== 1 ? 's' : '') + '</div>';
+    return;
+  }
+  
+  var html = '<div class="pagination-inner">';
+  html += '<button class="page-btn" onclick="goNotifPage(' + (notifCurrentPage - 1) + ')" ' + (notifCurrentPage <= 1 ? 'disabled' : '') + '>&#9664; Prev</button>';
+  
+  // Calculate visible page range
+  var startPage = Math.max(1, notifCurrentPage - 2);
+  var endPage = Math.min(totalPages, notifCurrentPage + 2);
+  if (endPage - startPage < 4) {
+    if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
+    else startPage = Math.max(1, endPage - 4);
+  }
+  
+  if (startPage > 1) {
+    html += '<button class="page-btn" onclick="goNotifPage(1)">1</button>';
+    if (startPage > 2) html += '<span class="page-ellipsis">...</span>';
+  }
+  
+  for (var p = startPage; p <= endPage; p++) {
+    html += '<button class="page-btn' + (p === notifCurrentPage ? ' active' : '') + '" onclick="goNotifPage(' + p + ')">' + p + '</button>';
+  }
+  
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) html += '<span class="page-ellipsis">...</span>';
+    html += '<button class="page-btn" onclick="goNotifPage(' + totalPages + ')">' + totalPages + '</button>';
+  }
+  
+  html += '<button class="page-btn" onclick="goNotifPage(' + (notifCurrentPage + 1) + ')" ' + (notifCurrentPage >= totalPages ? 'disabled' : '') + '>Next &#9654;</button>';
+  html += '<span class="pagination-info">' + totalItems + ' notification' + (totalItems !== 1 ? 's' : '') + '</span>';
+  html += '</div>';
+  
+  pag.innerHTML = html;
+}
+
+window.goNotifPage = function(page) {
+  notifCurrentPage = page;
+  renderNotifTable(notifHistoryCache);
+};
+
 async function loadNotificationHistory() {
   try {
     const data = await API.getNotificationHistory();
-    const container = document.getElementById("notification-history");
-    if (!container) return;
-
     const events = data.events || [];
     
     // Check for new events and update badge
@@ -156,23 +270,125 @@ async function loadNotificationHistory() {
         unreadNotifCount += newEvents;
         updateNotifBadge(unreadNotifCount);
       }
+      // Reset to first page when new events arrive
+      notifCurrentPage = 1;
     }
     notifHistoryCache = events;
-
-    if (events.length === 0) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">\u{1F514}</div><div class="empty-state-title">No notifications sent yet</div><div class="empty-state-text">Notifications will appear here once new listings are scraped or alerts are triggered.</div></div>`;
-      return;
-    }
-
-    container.innerHTML = events.map(e => {
-      const iconType = e.status === "sent" ? "success" : "error";
-      const time = new Date(e.timestamp).toLocaleString();
-      return `<div class="notification-history-item"><div class="notification-history-icon ${iconType}">${e.status === "sent" ? "\u2705" : "\u274C"}</div><div class="notification-history-details"><div class="n-title">${e.title || e.message}</div><div class="n-meta"><span>\u{1F4E1} ${e.channel || "-"}</span><span>\u{1F550} ${time}</span>${e.platform ? `<span>\u{1F4F1} ${e.platform}</span>` : ""}</div></div></div>`;
-    }).join("");
-    container.scrollTop = container.scrollHeight;
+    
+    renderNotifTable(events);
   } catch (err) {
     console.error("Failed to load notification history:", err);
   }
+}
+
+// --- NOTIFICATION DETAILS MODAL ---
+function openNotifDetails(event) {
+  var title = event.title || event.message || 'Notification';
+  var message = event.message || '';
+  var channel = event.channel || '-';
+  var status = event.status || 'info';
+  var platform = event.platform || '-';
+  var timestamp = event.timestamp ? new Date(event.timestamp).toLocaleString() : '-';
+  
+  var iconMap = { sent: '\u2705', error: '\u274C', info: '\u2139\uFE0F', warning: '\u26A0\uFE0F' };
+  var iconBgMap = { sent: 'var(--success-soft)', error: 'rgba(248, 113, 113, 0.12)', info: 'var(--info-soft)', warning: 'var(--warning-soft)' };
+  var statusBgMap = { sent: 'var(--success-soft)', error: 'rgba(248, 113, 113, 0.12)', info: 'var(--info-soft)', warning: 'var(--warning-soft)' };
+  var statusColorMap = { sent: 'var(--success)', error: 'var(--danger)', info: 'var(--info)', warning: 'var(--warning)' };
+  
+  var icon = document.getElementById('notif-detail-icon');
+  var titleEl = document.getElementById('notif-detail-title');
+  var channelEl = document.getElementById('notif-detail-channel');
+  var statusEl = document.getElementById('notif-detail-status');
+  var timestampEl = document.getElementById('notif-detail-timestamp');
+  var messageContainer = document.getElementById('notif-detail-msg-container');
+  var messageEl = document.getElementById('notif-detail-message');
+  var fieldsEl = document.getElementById('notif-detail-fields');
+  var modal = document.getElementById('modal-notif-details');
+  
+  if (!modal) return;
+  
+  // Icon
+  if (icon) {
+    icon.textContent = iconMap[status] || '\u2139\uFE0F';
+    icon.style.background = iconBgMap[status] || 'var(--info-soft)';
+  }
+  
+  // Title
+  if (titleEl) titleEl.textContent = title;
+  
+  // Channel badge
+  if (channelEl) {
+    channelEl.textContent = channel;
+    channelEl.className = 'platform-badge';
+    if (channel === 'fcm') channelEl.style.cssText = 'margin:0;font-size:0.7rem;background:rgba(255,204,0,0.1);color:#ffcc00;border-color:rgba(255,204,0,0.2);';
+    else if (channel === 'telegram') channelEl.style.cssText = 'margin:0;font-size:0.7rem;background:rgba(0,136,204,0.1);color:#0088cc;border-color:rgba(0,136,204,0.2);';
+    else if (channel === 'all') channelEl.style.cssText = 'margin:0;font-size:0.7rem;background:rgba(99,102,241,0.1);color:#a5b4fc;border-color:rgba(99,102,241,0.2);';
+    else channelEl.style.cssText = 'margin:0;font-size:0.7rem;background:rgba(255,255,255,0.05);color:var(--text-secondary);border-color:rgba(255,255,255,0.1);';
+  }
+  
+  // Status badge
+  if (statusEl) {
+    statusEl.textContent = status.toUpperCase();
+    statusEl.style.background = statusBgMap[status] || 'var(--info-soft)';
+    statusEl.style.color = statusColorMap[status] || 'var(--info)';
+    statusEl.className = 'notification-card-status';
+  }
+  
+  // Timestamp
+  if (timestampEl) timestampEl.textContent = '\u{1F550} ' + timestamp;
+  
+  // Full message
+  if (message && message !== title) {
+    if (messageContainer) messageContainer.style.display = 'block';
+    if (messageEl) messageEl.textContent = message;
+  } else {
+    if (messageContainer) messageContainer.style.display = 'none';
+  }
+  
+  // Detail fields
+  if (fieldsEl) {
+    var fields = [];
+    if (platform && platform !== '-') {
+      fields.push({ label: 'Platform', value: platform, icon: '\u{1F4F1}' });
+    }
+    fields.push({ label: 'Channel', value: channel, icon: '\u{1F4E1}' });
+    fields.push({ label: 'Status', value: status.toUpperCase(), icon: status === 'sent' ? '\u2705' : '\u274C' });
+    if (event.timestamp) {
+      var d = new Date(event.timestamp);
+      var dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+      fields.push({ label: 'Timestamp', value: dateStr, icon: '\u{1F550}' });
+    }
+    
+    fieldsEl.innerHTML = fields.map(function(f) {
+      return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-size:1.2rem;">' + f.icon + '</span>' +
+        '<div style="display:flex;flex-direction:column;">' +
+          '<span style="font-size:0.68rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;">' + f.label + '</span>' +
+          '<span style="font-size:0.85rem;font-weight:600;color:white;margin-top:2px;">' + f.value + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  
+  modal.classList.remove('hidden');
+}
+
+// Close notification detail modal
+function setupNotifDetailClose() {
+  var modal = document.getElementById('modal-notif-details');
+  if (!modal) return;
+  var closeBtn = document.getElementById('close-notif-detail-btn');
+  var closeBtn2 = document.getElementById('close-notif-detail-close-btn');
+  var closeHandler = function() { modal.classList.add('hidden'); };
+  if (closeBtn) closeBtn.addEventListener('click', closeHandler);
+  if (closeBtn2) closeBtn2.addEventListener('click', closeHandler);
+}
+
+// Call setup after DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupNotifDetailClose);
+} else {
+  setupNotifDetailClose();
 }
 
 async function testAllNotifications() {
@@ -983,8 +1199,8 @@ function populateNotifDropdown(events) {
     var iconType = e.status === 'sent' ? 'success' : 'error';
     var icon = e.status === 'sent' ? '\u2705' : '\u274C';
     var time = new Date(e.timestamp).toLocaleString();
-    var title = e.title || e.message || 'Notification';
-    var channel = e.channel || '-';
+    var title = esc(e.title || e.message || 'Notification');
+    var channel = esc(e.channel || '-');
     return '<div class="notif-dropdown-item">' +
       '<div class="notif-dropdown-item-icon ' + iconType + '">' + icon + '</div>' +
       '<div class="notif-dropdown-item-content">' +

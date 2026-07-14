@@ -1392,9 +1392,10 @@ select option {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .notification-history-details .n-meta {
@@ -2063,9 +2064,10 @@ select option {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .notif-dropdown-item-time {
@@ -2111,6 +2113,122 @@ select option {
     width: 300px;
     right: -60px;
   }
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.pagination-bar {
+  padding: 16px 18px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.pagination-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  min-width: 32px;
+  text-align: center;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.page-btn.active {
+  background: var(--gradient-accent);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-ellipsis {
+  color: var(--text-muted);
+  padding: 0 4px;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+}
+
+.pagination-info {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Notif table channel badges */
+.notif-table-row td {
+  vertical-align: middle;
+}
+
+.notif-table-row:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.notif-channel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Remove old notification history list styles */
+.notification-history {
+  max-height: none;
+}
+
+/* ============================================================
+   NOTIFICATION DETAILS MODAL
+   ============================================================ */
+/* Notification history item - clickable cursor */
+.notification-history-item {
+  cursor: pointer;
+  position: relative;
+}
+
+.notification-history-item::after {
+  content: '\01F441';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  opacity: 0;
+  transition: var(--transition-fast);
+  line-height: 1;
+}
+
+.notification-history-item:hover::after {
+  opacity: 0.7;
+}
+
+.notification-history-item:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
 }
 
 /* ============================================================
