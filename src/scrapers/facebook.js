@@ -4,7 +4,7 @@ import { createCursor } from "ghost-cursor";
 import { normalize, withinPrice } from "../normalize.js";
 import { loadProxies } from "../sessions.js";
 import { config } from "../config.js";
-import db, { logHealthEvent, recordPollingMetric, markAccountFailed, markAccountSuccess, getAccounts, deleteAccount } from "../db.js";
+import db, { logHealthEvent, recordPollingMetric, markAccountFailed, markAccountSuccess, getAccounts, deleteAccount, updateListingTimestamp } from "../db.js";
 import { pushAlert } from "../notify.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -57,7 +57,12 @@ function collectListings(node, out, depth = 0) {
     const id = node.id || node.legacy_id || node.story_key;
     const title = node.marketplace_listing_title || node.custom_title;
     if (id && title) out.push(node);
-    Object.values(node).forEach(v => collectListings(v, out, depth + 1));
+    for (const [key, val] of Object.entries(node)) {
+      if (/suggested|related|sponsored|outside_search|more_listings/i.test(key)) {
+        continue;
+      }
+      collectListings(val, out, depth + 1);
+    }
   }
 }
 
@@ -235,71 +240,120 @@ export async function scrapeFacebook(search) {
       }
 
       await simulateHumanBehavior(page, cursor);
-      const listings = captured.map(n => mapNode(n, search));
+      // Deduplicate captured raw nodes first
       const seen = new Set();
-      const unique = listings.filter(l => !seen.has(l.id) && seen.add(l.id));
+      const uniqueNodes = captured.filter(n => {
+        const id = n.id || n.legacy_id;
+        if (!id || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
 
-      // Fetch creation_time for new listings only
-      const checkStmt = db.prepare("SELECT 1 FROM seen_listings WHERE platform = 'facebook' AND listing_id = ?");
-      for (const item of unique) {
-        if (!item.id || !item.url) continue;
-        const exists = checkStmt.get(String(item.id));
-        if (!exists) {
-          console.log(`[facebook] Fetching creation_time for new listing ${item.id}...`);
-          try {
-            const detailPage = await context.newPage();
-            // Block stylesheets, images, media and fonts to load page extremely fast
-            await detailPage.route('**/*', (route) => {
-              const type = route.request().resourceType();
-              if (['image', 'media', 'font', 'stylesheet'].includes(type)) {
-                route.abort();
-              } else {
-                route.continue();
-              }
-            });
-            await detailPage.goto(item.url, { waitUntil: "domcontentloaded", timeout: 15000 });
-            const html = await detailPage.content();
-            await detailPage.close().catch(() => {});
-            
-            // Extract creation_time robustly using ID proximity
-            const idStr = String(item.id);
-            let pos = html.indexOf(idStr);
-            let extractedTs = null;
-            while (pos !== -1) {
-              const sub = html.substring(pos, pos + 5000);
-              const match = sub.match(/"creation_time":\s*(\d+)/);
-              if (match) {
-                const ts = parseInt(match[1], 10);
-                if (ts > 1500000000 && ts < 2000000000) {
-                  extractedTs = ts;
-                  break;
-                }
-              }
-              pos = html.indexOf(idStr, pos + 1);
-            }
-            
-            if (extractedTs) {
-              item.listed_at = new Date(extractedTs * 1000).toISOString();
-              console.log(`[facebook] Set listed_at for ${item.id} to ${item.listed_at}`);
-            }
-          } catch (e) {
-            console.warn(`[facebook] Failed to fetch details for ${item.id}:`, e.message);
-          }
+      // Map raw nodes to listings with category IDs
+      const mappedListings = uniqueNodes.map(n => ({
+        ...mapNode(n, search),
+        categoryId: n.marketplace_listing_category_id
+      }));
+
+      // Determine allowed category IDs based on the top 10 listings (the actual search query matches)
+      const allowedCategories = new Set();
+      const topCount = Math.min(mappedListings.length, 10);
+      for (let i = 0; i < topCount; i++) {
+        if (mappedListings[i].categoryId) {
+          allowedCategories.add(mappedListings[i].categoryId);
         }
       }
+
+      // Filter listings to only match the top categories
+      const filteredListings = mappedListings.filter(l => {
+        if (allowedCategories.size > 0 && l.categoryId) {
+          return allowedCategories.has(l.categoryId);
+        }
+        return true;
+      });
+
+      // Remove categoryId field from final objects
+      const unique = filteredListings.map(({ categoryId, ...rest }) => rest);
 
       if (unique.length === 0) {
         console.warn(`[facebook] Found 0 listings, taking debug screenshot`);
         try { await page.screenshot({ path: `data/fb-empty-debug.png` }); } catch(e) {}
       }
 
-      await browser.close();
+      // Check which items are new/unseen to fetch details in background
+      const checkStmt = db.prepare("SELECT 1 FROM seen_listings WHERE platform = 'facebook' AND listing_id = ?");
+      const newItemsToFetch = [];
+      for (const item of unique) {
+        if (!item.id || !item.url) continue;
+        const exists = checkStmt.get(String(item.id));
+        if (!exists) {
+          newItemsToFetch.push(item);
+        }
+      }
 
-      // Successful scraping!
-      markAccountSuccess(account.id);
-      
-      logHealthEvent(account.id, "success", `Scraped search "${search.keyword}" for ${search.location || "default location"} successfully. Found ${unique.length} items.`);
-      
+      if (newItemsToFetch.length > 0) {
+        console.log(`[facebook] Found ${newItemsToFetch.length} new items. Fetching creation times in background...`);
+        // Start background process
+        (async () => {
+          try {
+            for (const item of newItemsToFetch) {
+              console.log(`[facebook background] Fetching creation_time for new listing ${item.id}...`);
+              try {
+                const detailPage = await context.newPage();
+                // Block stylesheets, images, media and fonts to load page extremely fast
+                await detailPage.route('**/*', (route) => {
+                  const type = route.request().resourceType();
+                  if (['image', 'media', 'font', 'stylesheet'].includes(type)) {
+                    route.abort();
+                  } else {
+                    route.continue();
+                  }
+                });
+                await detailPage.goto(item.url, { waitUntil: "domcontentloaded", timeout: 15000 });
+                const html = await detailPage.content();
+                await detailPage.close().catch(() => {});
+                
+                // Extract creation_time robustly using ID proximity
+                const idStr = String(item.id);
+                let pos = html.indexOf(idStr);
+                let extractedTs = null;
+                while (pos !== -1) {
+                  const sub = html.substring(pos, pos + 5000);
+                  const match = sub.match(/"creation_time":\s*(\d+)/);
+                  if (match) {
+                    const ts = parseInt(match[1], 10);
+                    if (ts > 1500000000 && ts < 2000000000) {
+                      extractedTs = ts;
+                      break;
+                    }
+                  }
+                  pos = html.indexOf(idStr, pos + 1);
+                }
+                
+                if (extractedTs) {
+                  const listedAt = new Date(extractedTs * 1000).toISOString();
+                  console.log(`[facebook background] Set listed_at for ${item.id} to ${listedAt}`);
+                  // Update database payload
+                  await updateListingTimestamp("facebook", item.id, listedAt);
+                }
+              } catch (e) {
+                console.warn(`[facebook background] Failed to fetch details for ${item.id}:`, e.message);
+              }
+            }
+          } finally {
+            // Close the browser when background fetching is complete or fails
+            await browser.close().catch(() => {});
+            markAccountSuccess(account.id);
+            logHealthEvent(account.id, "success", `Scraped search "${search.keyword}" successfully. Background fetching finished.`);
+          }
+        })();
+      } else {
+        // No new items to fetch creation time for, close browser immediately
+        await browser.close().catch(() => {});
+        markAccountSuccess(account.id);
+        logHealthEvent(account.id, "success", `Scraped search "${search.keyword}" successfully. Found 0 new items.`);
+      }
+
       const filtered = withinPrice(unique, search.minPrice, search.maxPrice);
       recordPollingMetric("facebook", search.id, 1, Date.now() - startTime, filtered.length, account.id);
       

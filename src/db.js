@@ -144,6 +144,17 @@ const recentStmt = db.prepare(
    LIMIT @limit`
 );
 
+const updatePayloadStmt = db.prepare(`
+  UPDATE seen_listings
+  SET payload = @payload
+  WHERE platform = @platform AND listing_id = @listing_id
+`);
+
+const getPayloadStmt = db.prepare(`
+  SELECT payload FROM seen_listings
+  WHERE platform = @platform AND listing_id = @listing_id
+`);
+
 /**
  * Filters a batch of normalized listings down to the ones we have never seen,
  * and records the new ones. Returns only the genuinely new listings.
@@ -342,6 +353,37 @@ if (existing.length === 0 && config.searches && config.searches.length > 0) {
     for (const s of searches) addSearch(s);
   });
   tx(config.searches);
+}
+
+export async function updateListingTimestamp(platform, listingId, listedAt) {
+  const maxAttempts = 3;
+  const delayMs = 500;
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const row = getPayloadStmt.get({ platform, listing_id: String(listingId) });
+      if (row) {
+        const item = JSON.parse(row.payload);
+        item.listed_at = listedAt;
+        updatePayloadStmt.run({
+          platform,
+          listing_id: String(listingId),
+          payload: JSON.stringify(item),
+        });
+        console.log(`[db] Successfully updated listed_at for ${platform}:${listingId} to ${listedAt} (attempt ${attempt})`);
+        return true;
+      }
+      console.warn(`[db] Listing ${platform}:${listingId} not found in DB on attempt ${attempt}/${maxAttempts}. Retrying...`);
+    } catch (err) {
+      console.error(`[db] Error updating listing timestamp on attempt ${attempt}:`, err.message);
+    }
+    
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  console.error(`[db] Failed to update listed_at for ${platform}:${listingId} after ${maxAttempts} attempts`);
+  return false;
 }
 
 export default db;
