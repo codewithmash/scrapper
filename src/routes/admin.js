@@ -16,6 +16,8 @@ import {
 } from "../db.js";
 import { loadCookieFiles } from "../sessions.js";
 import { getSystemLogs } from "../logger.js";
+import { pushNewListings, pushAlert } from "../notify.js";
+import { addNotificationEvent, getNotificationEvents } from "../notificationEvents.js";
 
 const router = express.Router();
 
@@ -187,6 +189,81 @@ router.get("/metrics", (req, res) => {
 
 router.get("/logs", (req, res) => {
   res.json({ logs: getSystemLogs() });
+});
+
+// --- Notification Status & History ---
+router.get("/notifications/status", (req, res) => {
+  const fcmConfigured = !!(config.fcm.serviceAccountFile && fs.existsSync(config.fcm.serviceAccountFile));
+  const telegramConfigured = !!(config.telegram.botToken && config.telegram.chatId);
+  
+  res.json({
+    fcmConfigured,
+    fcmServiceAccount: config.fcm.serviceAccountFile || null,
+    fcmTopic: config.fcm.defaultTopic || null,
+    telegramConfigured,
+    telegramBotToken: config.telegram.botToken || null,
+    telegramChatId: config.telegram.chatId || null,
+  });
+});
+
+router.get("/notifications/history", (req, res) => {
+  res.json({ events: getNotificationEvents() });
+});
+
+// Test notification endpoint - sends a test alert to configured channels
+router.post("/notifications/test", async (req, res) => {
+  const { channel } = req.body;
+  
+  try {
+    const results = {};
+    
+    if (!channel || channel === 'all' || channel === 'fcm') {
+      if (config.fcm.serviceAccountFile) {
+        try {
+          await pushNewListings([
+            {
+              id: 'test-' + Date.now(),
+              platform: 'test',
+              title: '🔔 Test Notification from Dashboard',
+              price: 99,
+              currency: '$',
+              location: 'Dashboard',
+              url: '#',
+              image: '',
+              listed_at: new Date().toISOString()
+            }
+          ]);
+          results.fcm = { ok: true };
+        } catch (err) {
+          results.fcm = { ok: false, error: err.message };
+        }
+      } else {
+        results.fcm = { ok: false, error: 'FCM not configured' };
+      }
+    }
+    
+    if (!channel || channel === 'all' || channel === 'telegram') {
+      if (config.telegram.botToken && config.telegram.chatId) {
+        try {
+          await pushAlert(`🔔 *Test Alert from Admin Dashboard*\n\n✅ Your notification system is working!\n\n_Time: ${new Date().toLocaleString()}_`);
+          results.telegram = { ok: true };
+        } catch (err) {
+          results.telegram = { ok: false, error: err.message };
+        }
+      } else {
+        results.telegram = { ok: false, error: 'Telegram not configured' };
+      }
+    }
+    
+    // Determine overall success
+    const allResults = Object.values(results);
+    const anyOk = allResults.some(r => r.ok);
+    const success = !channel || channel === 'all' ? anyOk : results[channel]?.ok;
+    
+    res.json({ success: !!success, details: results });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 export default router;

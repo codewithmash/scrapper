@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="https://flagcdn.io/css/flag-icons.min.css" />
 </head>
 <body>
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
   <div id="login-overlay" class="active">
     <div class="glass-panel login-box">
       <div class="sparkle"></div>
@@ -38,6 +41,10 @@
         </button>
         <button class="nav-btn active" data-tab="tab-searches">Searches</button>
         <button class="nav-btn" data-tab="tab-accounts">FB Accounts</button>
+        <button class="nav-btn" data-tab="tab-notifications">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Notifications
+        </button>
         <button class="nav-btn" data-tab="tab-metrics">Metrics & Logs</button>
         <button class="nav-btn" data-tab="tab-cookies">FB Cookies</button>
         <button class="nav-btn" data-tab="tab-proxies">Proxies</button>
@@ -224,6 +231,69 @@
           </div>
           <div class="console-log" id="logs-container">
             <!-- JS injected -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Tab -->
+      <div id="tab-notifications" class="tab-pane hidden">
+        <header>
+          <h1>Notification Channels</h1>
+          <button id="test-all-notifications-btn" class="btn-test">
+            <span>📡</span>
+            <span>Test All Channels</span>
+          </button>
+        </header>
+
+        <!-- Status Cards -->
+        <div class="notification-status-grid">
+          <div class="notification-card">
+            <div class="notification-card-header">
+              <div class="notification-card-icon fcm">🔥</div>
+              <div class="notification-card-title">
+                <h3>Firebase Cloud Messaging</h3>
+                <p>Push notifications to mobile apps</p>
+              </div>
+              <span id="fcm-status-badge" class="notification-card-status inactive">Not Configured</span>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 56px;">
+              <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <span>Service Account: <strong id="fcm-service-account" style="color: var(--text-primary); font-family: monospace;">Not set</strong></span>
+                <span>Topic: <strong id="fcm-topic" style="color: var(--text-primary); font-family: monospace;">—</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notification-card">
+            <div class="notification-card-header">
+              <div class="notification-card-icon telegram">✈️</div>
+              <div class="notification-card-title">
+                <h3>Telegram Bot</h3>
+                <p>Instant alerts on your Telegram</p>
+              </div>
+              <span id="telegram-status-badge" class="notification-card-status inactive">Not Configured</span>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 56px;">
+              <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <span>Bot Token: <strong id="telegram-token" style="color: var(--text-primary); font-family: monospace;">Not set</strong></span>
+                <span>Chat ID: <strong id="telegram-chat-id" style="color: var(--text-primary); font-family: monospace;">—</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Notification History -->
+        <h2 class="section-title">
+          <svg style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Recent Notification Events
+        </h2>
+        <div class="glass-panel">
+          <div id="notification-history" class="notification-history">
+            <div class="empty-state">
+              <div class="empty-state-icon">🔔</div>
+              <div class="empty-state-title">No notifications sent yet</div>
+              <div class="empty-state-text">Notifications will appear here once new listings are scraped or alerts are triggered.</div>
+            </div>
           </div>
         </div>
       </div>

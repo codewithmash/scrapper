@@ -29,7 +29,12 @@ const API = {
     const res = await fetch("/api/listings/new?sinceSeconds=86400", { headers: { "x-api-key": apiKey } });
     if (res.status === 401) throw new Error("Unauthorized");
     return res.json();
-  }
+  },
+  
+  // Notification APIs
+  getNotificationStatus: () => API.req("/notifications/status"),
+  getNotificationHistory: () => API.req("/notifications/history"),
+  testNotification: (channel) => API.req("/notifications/test", { method: "POST", body: JSON.stringify({ channel }) }),
 };
 
 // --- DOM Elements ---
@@ -96,7 +101,10 @@ const el = {
   detailsDescription: document.getElementById("details-description"),
   detailsListed: document.getElementById("details-listed"),
   detailsSeen: document.getElementById("details-seen"),
-  detailsLink: document.getElementById("details-link")
+  detailsLink: document.getElementById("details-link"),
+  
+  // Notification elements
+  testAllNotificationsBtn: document.getElementById("test-all-notifications-btn"),
 };
 
 // --- Authentication ---
@@ -164,6 +172,10 @@ el.navBtns.forEach(btn => {
       loadListings();
     }
     else if (tabId === "tab-accounts") loadAccounts();
+    else if (tabId === "tab-notifications") {
+      loadNotificationStatus();
+      loadNotificationHistory();
+    }
     else if (tabId === "tab-metrics") loadMetrics();
     else if (tabId === "tab-searches") loadSearches();
     else if (tabId === "tab-cookies") loadCookies();
@@ -285,6 +297,33 @@ async function loadListings() {
           if (badge) {
             badge.textContent = unreadListingsCount;
             badge.style.display = "inline-block";
+          }
+          
+          // Show toast for new listings (batch if many, individual for few)
+          if (unread.length === 1) {
+            const item = unread[0];
+            showToast({
+              type: 'info',
+              title: `New: ${item.title?.slice(0, 50) || 'Listing found'}`,
+              message: `${item.platform} · ${item.price != null ? '$' + item.price : '?'}${item.location ? ' · ' + item.location : ''}`,
+              duration: 4000
+            });
+          } else if (unread.length <= 3) {
+            unread.forEach(item => {
+              showToast({
+                type: 'info',
+                title: `New: ${item.title?.slice(0, 40) || 'Listing found'}`,
+                message: `${item.platform} · ${item.price != null ? '$' + item.price : '?'}`,
+                duration: 3500
+              });
+            });
+          } else {
+            showToast({
+              type: 'info',
+              title: `🎯 ${unread.length} new listings found!`,
+              message: `Across ${new Set(unread.map(i => i.platform)).size} platform(s)`,
+              duration: 5000
+            });
           }
         }
       }
@@ -1372,6 +1411,11 @@ if (menuToggle && sidebar && sidebarOverlay) {
       }
     });
   });
+}
+
+// Notification test button
+if (el.testAllNotificationsBtn) {
+  el.testAllNotificationsBtn.addEventListener('click', testAllNotifications);
 }
 
 // Boot
