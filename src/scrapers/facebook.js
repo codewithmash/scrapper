@@ -1,5 +1,5 @@
 // src/scrapers/facebook.js
-import { launchBrowser, defaultContextOptions, generateFingerprint, fingerprintInjector } from "../browser.js";
+import { launchBrowser, defaultContextOptions, generateFingerprint, fingerprintInjector, getTimezoneForLocation } from "../browser.js";
 import { createCursor } from "ghost-cursor";
 import { normalize, withinPrice } from "../normalize.js";
 import { loadProxies } from "../sessions.js";
@@ -41,10 +41,31 @@ async function simulateHumanBehavior(page, cursor) {
       await page.waitForTimeout(250 + Math.random() * 500);
     } catch(e) {}
   }
-  await page.evaluate(() => window.scrollTo(0, 800));
-  await page.waitForTimeout(1000);
-  await page.evaluate(() => window.scrollTo(0, 1600));
-  await page.waitForTimeout(900);
+  
+  // Smooth scroll scrollbar simulation
+  await smoothScroll(page, 0, 800);
+  await page.waitForTimeout(800 + Math.random() * 400);
+  await smoothScroll(page, 800, 1600);
+  await page.waitForTimeout(600 + Math.random() * 400);
+}
+
+async function smoothScroll(page, from, to) {
+  await page.evaluate(async ({ start, end }) => {
+    await new Promise((resolve) => {
+      let current = start;
+      const step = 25; // Smaller steps for smoothness
+      const timer = setInterval(() => {
+        current += step + Math.floor(Math.random() * 10 - 5); // Add jitter to steps
+        if (current >= end) {
+          window.scrollTo(0, end);
+          clearInterval(timer);
+          resolve();
+        } else {
+          window.scrollTo(0, current);
+        }
+      }, 15 + Math.random() * 15); // Jittery interval speed
+    });
+  }, { start: from, end: to });
 }
 
 function collectListings(node, out, depth = 0) {
@@ -204,9 +225,15 @@ export async function scrapeFacebook(search) {
         console.warn(`[facebook] Failed to read cookie ${cookieFile}:`, err.message);
       }
 
+      // Timezone selection matching the search location or proxy label
+      const tzId = getTimezoneForLocation(search.location) || getTimezoneForLocation(proxy?.label) || undefined;
+      if (tzId) {
+        console.log(`[facebook] Matching timezone found: ${tzId} for search location: ${search.location || 'none'}, proxy label: ${proxy?.label || 'none'}`);
+      }
+
       const fingerprintData = generateFingerprint();
       const context = await browser.newContext({
-        ...defaultContextOptions(fingerprintData),
+        ...defaultContextOptions(fingerprintData, { timezoneId: tzId }),
         storageState: cookieObj,
       });
       await fingerprintInjector.attachFingerprintToPlaywright(context, fingerprintData);
@@ -382,9 +409,27 @@ export async function scrapeFacebook(search) {
                 const tsMatch = html.match(/(Clean|Rebuilt|Salvage)\s+title/i) || html.match(/Title\s+status:\s*([a-zA-Z\s]{3,20})/i);
                 if (tsMatch) titleStatus = tsMatch[1].trim();
 
+                // Extract additional images from detail page HTML
+                const detailImages = [];
+                let photoPos = html.indexOf('listing_photos');
+                if (photoPos !== -1) {
+                  const sub = html.substring(photoPos, photoPos + 30000);
+                  const uriMatches = sub.matchAll(/uri["\\]+\s*:\s*["\\]+(https?:[^"\\]+)/gi);
+                  for (const match of uriMatches) {
+                    let cleanUrl = match[1].replace(/\\/g, ''); // Remove escape characters
+                    if (cleanUrl.startsWith('http') && !detailImages.includes(cleanUrl)) {
+                      detailImages.push(cleanUrl);
+                    }
+                  }
+                }
+
                 const updates = { extra: {} };
                 if (extractedTs) {
                   updates.listed_at = new Date(extractedTs * 1000).toISOString();
+                }
+                if (detailImages.length > 0) {
+                  updates.images = detailImages;
+                  updates.image = detailImages[0];
                 }
                 if (description) updates.extra.description = description;
                 if (mileage) updates.extra.mileage = mileage;
