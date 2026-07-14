@@ -1,4 +1,4 @@
-import { launchBrowser, defaultContextOptions, generateFingerprint, fingerprintInjector } from "../browser.js";
+import { launchBrowser, defaultContextOptions, generateFingerprint, fingerprintInjector, getTimezoneForLocation } from "../browser.js";
 import { normalize, withinPrice } from "../normalize.js";
 import { loadProxies } from "../sessions.js";
 
@@ -18,8 +18,15 @@ export async function scrapeOfferUp(search) {
     if (proxy) console.log(`[offerup] trying proxy: ${proxy.server}`);
 
     const browser = await launchBrowser({ proxy });
+    
+    // Timezone selection matching search location or proxy label
+    const tzId = getTimezoneForLocation(search.location) || getTimezoneForLocation(proxy?.label) || undefined;
+    if (tzId) {
+      console.log(`[offerup] Matching timezone found: ${tzId} for search location: ${search.location || 'none'}, proxy label: ${proxy?.label || 'none'}`);
+    }
+
     const fingerprintData = generateFingerprint();
-    const context = await browser.newContext(defaultContextOptions(fingerprintData));
+    const context = await browser.newContext(defaultContextOptions(fingerprintData, { timezoneId: tzId }));
     await fingerprintInjector.attachFingerprintToPlaywright(context, fingerprintData);
     const page = await context.newPage();
 
