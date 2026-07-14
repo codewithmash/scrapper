@@ -370,6 +370,18 @@ export async function scrapeFacebook(search) {
                 const fuelMatch = html.match(/(Gasoline|Diesel|Electric|Hybrid)\s+fuel/i) || html.match(/Fuel\s+type:\s*([a-zA-Z]+)/i);
                 if (fuelMatch) fuelType = fuelMatch[1];
 
+                let year = null;
+                const yearMatch = item.title.match(/\b(19\d{2}|20\d{2})\b/) || html.match(/Year:\s*(\d{4})/i) || html.match(/"manufacture_year"\s*:\s*(\d{4})/i);
+                if (yearMatch) year = yearMatch[1];
+
+                let condition = null;
+                const condMatch = html.match(/Condition:\s*([a-zA-Z\s]{3,20})/i) || html.match(/"vehicle_condition"\s*:\s*"([^"]+)"/i);
+                if (condMatch) condition = condMatch[1].trim();
+
+                let titleStatus = null;
+                const tsMatch = html.match(/(Clean|Rebuilt|Salvage)\s+title/i) || html.match(/Title\s+status:\s*([a-zA-Z\s]{3,20})/i);
+                if (tsMatch) titleStatus = tsMatch[1].trim();
+
                 const updates = { extra: {} };
                 if (extractedTs) {
                   updates.listed_at = new Date(extractedTs * 1000).toISOString();
@@ -379,6 +391,9 @@ export async function scrapeFacebook(search) {
                 if (transmission) updates.extra.transmission = transmission;
                 if (color) updates.extra.color = color;
                 if (fuelType) updates.extra.fuelType = fuelType;
+                if (year) updates.extra.year = year;
+                if (condition) updates.extra.condition = condition;
+                if (titleStatus) updates.extra.titleStatus = titleStatus;
 
                 console.log(`[facebook background] Extracted details for ${item.id}:`, JSON.stringify(updates.extra));
                 await updateListingDetails("facebook", item.id, updates);

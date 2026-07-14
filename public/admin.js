@@ -85,6 +85,7 @@ const el = {
   
   modalDetails: document.getElementById("modal-details"),
   closeDetailsBtn: document.getElementById("close-details-btn"),
+  closeDetailsXBtn: document.getElementById("close-details-x-btn"),
   detailsTitle: document.getElementById("details-title"),
   detailsPlatformBadge: document.getElementById("details-platform-badge"),
   detailsImageCarousel: document.getElementById("details-image-carousel"),
@@ -324,24 +325,62 @@ function renderListings() {
   }
   
   el.listingsGrid.innerHTML = filtered.map(l => {
-    const dateText = l.listed_at 
-      ? new Date(l.listed_at).toLocaleString() 
-      : `Detected: ${l.first_seen ? new Date(l.first_seen).toLocaleString() : 'Recently'}`;
+    // Format price with local separators
+    const formattedPrice = l.price != null ? Number(l.price).toLocaleString() : '?';
+
+    // Format times
+    const listedTimeStr = l.listed_at ? new Date(l.listed_at).toLocaleString() : 'Waiting for fetch...';
+    const scrapedTimeStr = l.first_seen ? new Date(l.first_seen).toLocaleString() : 'Recently';
+
     return `
       <div class="glass-panel listing-card" data-id="${l.id}">
-        <div class="img-wrapper" style="background-image: url('${l.image || ''}'); position: relative;">
-          <button class="view-details-btn" title="View Details">
-            <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-            </svg>
-          </button>
+        <div class="img-wrapper" style="background-image: url('${l.image || ''}'); position: relative; border-radius: 12px 12px 0 0;">
+          <!-- Floating platform badge -->
+          <span class="platform-badge platform-${l.platform}" style="position: absolute; top: 12px; left: 12px; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">${l.platform}</span>
         </div>
-        <div class="details">
-          <span class="platform-badge platform-${l.platform}">${l.platform}</span>
-          <h4><a href="${l.url}" target="_blank" onclick="event.stopPropagation();" style="color: white; text-decoration: none;">${l.title}</a></h4>
-          <p class="price" style="color: #86efac; font-weight: bold; font-size: 1.2rem; margin: 8px 0;">${l.currency || '$'}${l.price != null ? l.price : '?'}</p>
-          <p style="color: var(--text-secondary); font-size: 0.8rem;">${l.location || 'Unknown Location'} • ${dateText}</p>
+        <div class="details" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between; flex: 1; min-height: 260px; box-sizing: border-box;">
+          <div>
+            <!-- Make/Brand Badge -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              ${l.make ? `<span style="font-size: 0.72rem; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); padding: 2px 8px; border-radius: 4px; font-weight: 600; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.5px;">${l.make}</span>` : `<span style="font-size: 0.72rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Vehicle</span>`}
+            </div>
+            <!-- Title -->
+            <h4 style="margin: 0 0 10px 0; font-size: 0.92rem; line-height: 1.4; color: white; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.8em; font-weight: 600;" title="${l.title}">${l.title}</h4>
+            <!-- Price -->
+            <div style="margin-bottom: 12px;">
+              <span style="color: #86efac; font-weight: 700; font-size: 1.4rem;">${l.currency || '$'}${formattedPrice}</span>
+            </div>
+          </div>
+          
+          <div>
+            <!-- Location and Time -->
+            <div style="color: var(--text-secondary); font-size: 0.78rem; margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; box-sizing: border-box;">
+              <div style="display: flex; align-items: center; gap: 6px; width: 100%; overflow: hidden;">
+                <svg style="width: 12px; height: 12px; flex-shrink: 0; color: var(--text-secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; flex: 1;">${l.location || 'Unknown Location'}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <svg style="width: 12px; height: 12px; flex-shrink: 0; color: var(--text-secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span><strong>Listed:</strong> ${listedTimeStr}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <svg style="width: 12px; height: 12px; flex-shrink: 0; color: var(--text-secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <span><strong>Scraped:</strong> ${scrapedTimeStr}</span>
+              </div>
+            </div>
+            
+            <!-- Card Actions -->
+            <div style="display: flex; gap: 8px; box-sizing: border-box;">
+              <button class="card-details-btn" title="View Details">
+                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                <span>Details</span>
+              </button>
+              <a href="${l.url}" target="_blank" onclick="event.stopPropagation();" class="secondary-btn" style="flex: 0.8; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 12px; font-size: 0.8rem; border-radius: 6px; font-weight: 600; text-align: center; box-sizing: border-box;">
+                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                <span>Link</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -353,7 +392,7 @@ function renderListings() {
     const listing = allListings.find(l => String(l.id) === String(id));
     if (!listing) return;
 
-    const btn = card.querySelector('.view-details-btn');
+    const btn = card.querySelector('.card-details-btn');
     if (btn) {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -398,6 +437,15 @@ function openDetailsModal(listing) {
     }
     
     // Add extra details if they exist
+    if (extra.year) {
+      specs.push({ label: 'Year', value: extra.year, icon: '📅' });
+    }
+    if (extra.condition) {
+      specs.push({ label: 'Condition', value: extra.condition, icon: '✨' });
+    }
+    if (extra.titleStatus) {
+      specs.push({ label: 'Title Status', value: extra.titleStatus, icon: '📝' });
+    }
     if (extra.mileage) {
       specs.push({ label: 'Mileage', value: extra.mileage, icon: '🛣️' });
     }
@@ -454,6 +502,9 @@ function openDetailsModal(listing) {
 
 if (el.closeDetailsBtn) {
   el.closeDetailsBtn.addEventListener('click', () => el.modalDetails.classList.add('hidden'));
+}
+if (el.closeDetailsXBtn) {
+  el.closeDetailsXBtn.addEventListener('click', () => el.modalDetails.classList.add('hidden'));
 }
 
 if (el.filterListingsKeyword) el.filterListingsKeyword.addEventListener("input", renderListings);
